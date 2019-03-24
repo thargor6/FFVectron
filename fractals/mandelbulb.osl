@@ -1,0 +1,32 @@
+#include "octane-oslintrin.h"
+shader OslGeometry(
+    int Iterations = 10,
+    float Power = 2.0,
+    float Bailout = 20,
+    output _sdf c = _SDFDEF)
+{
+    vector pos = P;
+
+	vector z = P;
+	float dr = 1.0;
+	float r = 0.0;
+	for (int i = 0; i < Iterations ; i++) {
+		r = length(z);
+		if (r>Bailout) break;
+		
+		// convert to polar coordinates
+		float theta = acos(z[2]/r);
+		float phi = atan2(z[1],z[0]);
+		dr =  pow( r, Power-1.0)*Power*dr + 1.0;
+		
+		// scale and rotate the point
+		float zr = pow( r,Power);
+		theta = theta*Power;
+		phi = phi*Power;
+		
+		// convert back to cartesian coordinates
+		z = zr*vector(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
+		z+=pos;
+	}
+	c.dist = 0.5*log(r)*r/dr;
+}
