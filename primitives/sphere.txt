@@ -1,0 +1,8 @@
+#include "octane-oslintrin.h"
+shader Sphere(
+    float Radius = 1,
+    output _sdf c = _SDFDEF)
+{
+    float x = length(P) - Radius;
+    c.dist = x;
+}

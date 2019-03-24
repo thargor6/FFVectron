@@ -1,0 +1,259 @@
+// The MIT License
+// Copyright © 2013 Inigo Quilez
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    
+
+// A list of useful distance function to simple primitives, and an example on how to 
+// do some interesting boolean operations, repetition and displacement.
+//
+// More info here: http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
+
+
+#define AA 1   // make this 1 is your machine is too slow
+
+#include "octane-oslintrin.h"
+//------------------------------------------------------------------
+
+vector xz(vector vec)
+{
+    return vector(vec[0],vec[2], 0);
+}
+
+vector xy(vector vec)
+{
+    return vector(vec[0], vec[1], 0);
+}
+
+vector vec2(float a, float b)
+{
+    return vector(a,b,0);
+}
+
+float sdPlane( vector p )
+{
+	return p[1];
+}
+
+float sdSphere( vector p, float s )
+{
+    return length(p)-s;
+}
+
+float sdBox( vector p, vector b )
+{
+    vector d = abs(p) - b;
+    return min(max(d[0],max(d[1],d[2])),0.0) + length(max(d,0.0));
+}
+
+float sdEllipsoid( vector p, vector r )
+{
+    return (length( p/r ) - 1.0) * min(min(r[0],r[1]),r[2]);
+}
+
+float udRoundBox( vector p, vector b, float r )
+{
+    return length(max(abs(p)-b,0.0))-r;
+}
+
+float sdTorus( vector p, vector t )
+{
+    return length( vec2(length(xz(p))-t[0],p[1]) )-t[1];
+}
+
+float sdHexPrism( vector p, vector h )
+{
+    vector q = abs(p);
+#if 0
+    return max(q[2]-h[1],max((q[0]*0.866025+q[1]*0.5),q[1])-h[0]);
+#else
+    float d1 = q[2]-h[1];
+    float d2 = max((q[0]*0.866025+q[1]*0.5),q[1])-h[0];
+    return length(max(vec2(d1,d2),0.0)) + min(max(d1,d2), 0.);
+#endif
+}
+
+float sdCapsule( vector p, vector a, vector b, float r )
+{
+	vector pa = p-a, ba = b-a;
+	float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+	return length( pa - ba*h ) - r;
+}
+
+float sdEquilateralTriangle( vector p )
+{
+    float k = 1.73205;//sqrt(3.0);
+    p[0] = abs(p[0]) - 1.0;
+    p[1] = p[1] + 1.0/k;
+    if( p[0] + k*p[1] > 0.0 ) p = vec2( p[0] - k*p[1], -k*p[0] - p[1] )/2.0;
+    p[0] += 2.0 - 2.0*clamp( (p[0]+2.0)/2.0, 0.0, 1.0 );
+    return -length(p)*sign(p[1]);
+}
+
+float sdTriPrism( vector p, vector h )
+{
+    vector q = abs(p);
+    float d1 = q[2]-h[1];
+#if 1
+    // distance bound
+    float d2 = max(q[0]*0.866025+p[1]*0.5,-p[1])-h[0]*0.5;
+#else
+    // correct distance
+    h[0] *= 0.866025;
+    float d2 = sdEquilateralTriangle(xy(p)/h[0])*h[0];
+#endif
+    return length(max(vec2(d1,d2),0.0)) + min(max(d1,d2), 0.);
+}
+
+float sdCylinder( vector p, vector h )
+{
+  vector d = abs(vec2(length(xz(p)),p[1])) - h;
+  return min(max(d[0],d[1]),0.0) + length(max(d,0.0));
+}
+
+float sdCone( vector p, vector c )
+{
+    vector q = vec2( length(xz(p)), p[1] );
+    float d1 = -q[1]-c[2];
+    float d2 = max( dot(q,xy(c)), q[1]);
+    return length(max(vec2(d1,d2),0.0)) + min(max(d1,d2), 0.);
+}
+
+float sdConeSection( vector p, float h, float r1, float r2 )
+{
+    float d1 = -p[1] - h;
+    float q = p[1] - h;
+    float si = 0.5*(r1-r2)/h;
+    float d2 = max( sqrt( dot(xz(p),xz(p))*(1.0-si*si)) + q*si - r2, q );
+    return length(max(vec2(d1,d2),0.0)) + min(max(d1,d2), 0.);
+}
+
+float sdPryamid4(vector p, vector h ) // h = { cos a, sin a, height }
+{
+    // Tetrahedron = Octahedron - Cube
+    float box = sdBox( p - vector(0,-2.0*h[2],0), vector(2.0*h[2]) );
+ 
+    float d = 0.0;
+    d = max( d, abs( dot(p, vector( -h[0], h[1], 0 )) ));
+    d = max( d, abs( dot(p, vector(  h[0], h[1], 0 )) ));
+    d = max( d, abs( dot(p, vector(  0, h[1], h[0] )) ));
+    d = max( d, abs( dot(p, vector(  0, h[1],-h[0] )) ));
+    float octa = d - h[2];
+    return max(-box,octa); // Subtraction
+ }
+
+float length2( vector p )
+{
+	return sqrt( p[0]*p[0] + p[1]*p[1] );
+}
+
+float length6( vector p )
+{
+	p = p*p*p; p = p*p;
+	return pow( p[0] + p[1], 1.0/6.0 );
+}
+
+float length8( vector p )
+{
+	p = p*p; p = p*p; p = p*p;
+	return pow( p[0] + p[1], 1.0/8.0 );
+}
+
+float sdTorus82( vector p, vector t )
+{
+    vector q = vec2(length2(xz(p))-t[0],p[1]);
+    return length8(q)-t[1];
+}
+
+float sdTorus88( vector p, vector t )
+{
+    vector q = vec2(length8(xz(p))-t[0],p[1]);
+    return length8(q)-t[1];
+}
+
+float sdCylinder6( vector p, vector h )
+{
+    return max( length6(xz(p))-h[0], abs(p[1])-h[1] );
+}
+
+//------------------------------------------------------------------
+
+float opS( float d1, float d2 )
+{
+    return max(-d2,d1);
+}
+
+vector opU( vector d1, vector d2 )
+{
+	return (d1[0]<d2[0]) ? d1 : d2;
+}
+
+vector opRep( vector p, vector c )
+{
+    return mod(p,c)-0.5*c;
+}
+
+
+vector opTwist( vector p )
+{
+    float  c = cos(10.0*p[1]+10.0);
+    float  s = sin(10.0*p[1]+10.0);
+    matrix   m = matrix(c, -s, 0, 0, 
+                        s,  c, 0, 0,
+                        0,  0, 1, 0,
+                        0,  0, 0, 1);
+    vector v = transform(m,xz(p));
+    v[2] = p[1];
+    return v;
+}
+
+//------------------------------------------------------------------
+
+float map( vector pos )
+{
+    //vector res = opU( vec2( sdPlane(     pos), 1.0 ),
+	//                vec2( sdSphere(    pos-vector( 0.0,0.25, 0.0), 0.25 ), 46.9 ) );
+    vector res = vec2( sdSphere(    pos-vector( 0.0,0.25, 0.0), 0.25 ), 46.9 );
+    res = opU( res, vec2( sdBox(       pos-vector( 1.0,0.25, 0.0), vector(0.25) ), 3.0 ) );
+    res = opU( res, vec2( udRoundBox(  pos-vector( 1.0,0.25, 1.0), vector(0.15), 0.1 ), 41.0 ) );
+	res = opU( res, vec2( sdTorus(     pos-vector( 0.0,0.25, 1.0), vec2(0.20,0.05) ), 25.0 ) );
+    res = opU( res, vec2( sdCapsule(   pos,vector(-1.3,0.10,-0.1), vector(-0.8,0.50,0.2), 0.1  ), 31.9 ) );
+	res = opU( res, vec2( sdTriPrism(  pos-vector(-1.0,0.25,-1.0), vec2(0.25,0.05) ),43.5 ) );
+	res = opU( res, vec2( sdCylinder(  pos-vector( 1.0,0.30,-1.0), vec2(0.1,0.2) ), 8.0 ) );
+	res = opU( res, vec2( sdCone(      pos-vector( 0.0,0.50,-1.0), vector(0.8,0.6,0.3) ), 55.0 ) );
+	res = opU( res, vec2( sdTorus82(   pos-vector( 0.0,0.25, 2.0), vec2(0.20,0.05) ),50.0 ) );
+	res = opU( res, vec2( sdTorus88(   pos-vector(-1.0,0.25, 2.0), vec2(0.20,0.05) ),43.0 ) );
+	res = opU( res, vec2( sdCylinder6( pos-vector( 1.0,0.30, 2.0), vec2(0.1,0.2) ), 12.0 ) );
+	res = opU( res, vec2( sdHexPrism(  pos-vector(-1.0,0.20, 1.0), vec2(0.25,0.05) ),17.0 ) );
+	res = opU( res, vec2( sdPryamid4(  pos-vector(-1.0,0.15,-2.0), vector(0.8,0.6,0.25) ),37.0 ) );
+    res = opU( res, vec2( opS( udRoundBox(  pos-vector(-2.0,0.2, 1.0), vector(0.15),0.05),
+	                           sdSphere(    pos-vector(-2.0,0.2, 1.0), 0.25)), 13.0 ) );
+    res = opU( res, vec2( opS( sdTorus82(  pos-vector(-2.0,0.2, 0.0), vec2(0.20,0.1)),
+	                           sdCylinder(  opRep( vector(atan2(pos[0]+2.0,pos[2])/6.2831, pos[1], 0.02+0.5*length(pos-vector(-2.0,0.2, 0.0))), vector(0.05,1.0,0.05)), vec2(0.02,0.6))), 51.0 ) );
+	res = opU( res, 
+vec2(
+    0.5 
+    * sdSphere(
+        pos - vector(-2.0,0.25,-1.0),0.2) 
+        + 0.03 * sin(50.0*pos[0])
+               * sin(50.0*pos[1])
+               * sin(50.0*pos[2]), 
+        65.0 
+    )
+);
+
+	res = opU( res, vec2( 0.5*sdTorus( opTwist(pos-vector(-2.0,0.25, 2.0)),vec2(0.20,0.05)), 46.7 ) );
+    res = opU( res, vec2( sdConeSection( pos-vector( 0.0,0.35,-2.0), 0.15, 0.2, 0.1 ), 13.67 ) );
+    res = opU( res, vec2( sdEllipsoid( pos-vector( 1.0,0.35,-2.0), vector(0.15, 0.2, 0.05) ), 43.17 ) );
+        
+    return res[0];
+}
+
+
+
+shader OslGeometry(
+    //vector spherePos = vector(1,1,1),
+    output _sdf c = _SDFDEF)
+{
+    c.dist = map(P);
+}
+
