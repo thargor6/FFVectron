@@ -1,59 +1,26 @@
 #include "octane-oslintrin.h"
+#include "ff-vectron.h"
 
-float length(vector a) {
-	return sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
-}
+shader OslGeometry(int FoldingNumber = 7, output _sdf c = _SDFDEF) {
+  vec4 param_min = vec4(-0.8323, -0.694, -0.5045, 0.8067);
+  vec4 param_max = vec4(0.8579, 1.0883, 0.8937, 0.9411);
+  float k1, k2, rp2, rq2;
+  float scale = 1.0;
+  float orb = 1e4;
+  vec3 p = toVec3(P);
+  vec3 q = toVec3(P);
 
-float fract(float x) {
-	return x - floor(x); 
-}
-
-float clamp(float x, float minVal, float maxVal) {
-	return x<minVal ? minVal : x > maxVal ? maxVal : x;
-}
-
-float dot(vector a, vector b) {
-	return a[0]*b[0] + a[1]*b[1] + a[2] * b[2];
-}
-
-
-shader OslGeometry(
-    int FoldingNumber = 7,
-    output _sdf c = _SDFDEF)
-{
-        float param_min_x = -0.8323;
-        float param_min_y = -0.694;
-        float param_min_z = -0.5045;
-        float param_min_w = 0.8067;
-	float param_max_x = 0.8579;
-        float param_max_y = 1.0883;
-        float param_max_z = 0.8937;
-        float param_max_w = 0.9411;
-	float k1, k2, rp2, rq2;
-	float scale = 1.0;
-	float orb = 1e4;
-	vector p = P;
-	vector q = P;
-
-	for (int i = 0; i < FoldingNumber; i++) {
-		p[0] = 2.0 * clamp(p[0], param_min_x, param_max_x) - p[0];
-		p[1] = 2.0 * clamp(p[1], param_min_y, param_max_y) - p[1];
-		p[2] = 2.0 * clamp(p[2], param_min_z, param_max_z) - p[2];
-		q[0] = 2.0 * fract(0.5 * q[0] + 0.5) - 1.0;
-		q[1] = 2.0 * fract(0.5 * q[1] + 0.5) - 1.0;
-		q[2] = 2.0 * fract(0.5 * q[2] + 0.5) - 1.0;
-		rp2 = dot(p, p);
-		rq2 = dot(q, q);
-		k1 = max(param_min_w / rp2, 1.0);
-		k2 = max(param_min_w / rq2, 1.0);
-		p[0] *= k1;
-		p[1] *= k1;
-		p[2] *= k1;
-		q[0] *= k2;
-		q[1] *= k2;
-		q[2] *= k2;
-		scale *= k1;
-	}
-	float lxy = sqrt(p[0]*p[0]+p[1]*p[1]);
-	c.dist = 0.5 * max(param_max_w - lxy, lxy * p[2] / length(p)) / scale;
+  for (int i = 0; i < FoldingNumber; i++) {
+    p = 2.0 * clamp(p, param_min, param_max) - p;
+    q = 2.0 * fract(0.5 * q + 0.5) - 1.0;
+    rp2 = dot(p, p);
+    rq2 = dot(q, q);
+    k1 = max(param_min.w / rp2, 1.0);
+    k2 = max(param_min.w / rq2, 1.0);
+    p *= k1;
+    q *= k2;
+    scale *= k1;
+  }
+  float lxy = sqrt(p.x*p.x+p.y*p.y);
+  c.dist = 0.5 * max(param_max.w - lxy, lxy * p.z / length(p)) / scale;
 }

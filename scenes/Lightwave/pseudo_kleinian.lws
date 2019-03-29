@@ -912,7 +912,7 @@ Plugin GlobalIlluminationHandler 1 MonteCarlo
         Tag "FORMAT" "Angle"
         { Value
           "double"
-          0.34906585039886589561
+          0.3490658503988658401
         }
       }
       { Attr
@@ -1169,7 +1169,7 @@ Plugin GlobalIlluminationHandler 2 MonteCarlo
         Tag "FORMAT" "Angle"
         { Value
           "double"
-          0.34906585039886589561
+          0.3490658503988658401
         }
       }
       { Attr
@@ -1436,8 +1436,8 @@ Channel 0
 Channel 1
 { Envelope
   2
-  Key 0.39500001072883605957 0 0 0 0 0 0 -0.3949725820773029028 0
-  Key 0 4 0 0 0 0 -0.3949725820773029028 0 0
+  Key 0.39500001072883611508 0 0 0 0 0 0 -0.39497258207730295831 0
+  Key 0 4 0 0 0 0 -0.39497258207730295831 0 0
   Behaviors 1 1
 }
 Channel 2
@@ -1667,9 +1667,9 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       Name "Octane OSL Node (1)"
       Coordinates -100 -220
       Mode 1
-      Selected 0
+      Selected 1
       { Data
-        filename "D:\\DEV\\Lightwave\\FFVectron\\fractals\\pseudo_kleinian.osl"
+        filename "\\fractals\\pseudo_kleinian.osl"
         node_type 3
       }
       Preview "Octane OSL Texture"
@@ -1947,7 +1947,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       Name "Folding Number (1)"
       Coordinates 100 80
       Mode 1
-      Selected 1
+      Selected 0
       { Data
         { Scalar
           { VariantParameter
@@ -2292,36 +2292,36 @@ NumChannels 9
 Channel 0
 { Envelope
   2
-  Key -2 0 0 0 0 0 0 0.53490631514626663101 0
-  Key -1.4650565385818481445 4 0 0 0 0 0.53490631514626663101 0 0
+  Key -2 0 0 0 0 0 0 0.53490631514626651999 0
+  Key -1.4650565385818481445 4 0 0 0 0 0.53490631514626651999 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   2
   Key 2 0 0 0 0 0 0 1.6148873877421028311 0
-  Key 3.6149995326995849609 4 0 0 0 0 1.6148873877421028311 0 0
+  Key 3.6149995326995845168 4 0 0 0 0 1.6148873877421028311 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   2
-  Key -2 0 0 0 0 0 0 -0.78907231474641248425 0
-  Key -2.7891271114349365234 4 0 0 0 0 -0.78907231474641248425 0 0
+  Key -2 0 0 0 0 0 0 -0.78907231474641259528 0
+  Key -2.7891271114349365234 4 0 0 0 0 -0.78907231474641259528 0 0
   Behaviors 1 1
 }
 Channel 3
 { Envelope
   2
-  Key 0.785398163397448279 0 0 0 0 0 0 0.020942507200738733758 0
+  Key 0.78539816339744816798 0 0 0 0 0 0 0.020942507200738733758 0
   Key 0.80634212493896484375 4 0 0 0 0 0.020942507200738733758 0 0
   Behaviors 1 1
 }
 Channel 4
 { Envelope
   2
-  Key 0.61086523819801530344 0 0 0 0 0 0 0.22862235233271666068 0
-  Key 0.83950346708297729492 4 0 0 0 0 0.22862235233271666068 0 0
+  Key 0.61086523819801519242 0 0 0 0 0 0 0.22862235233271663293 0
+  Key 0.83950346708297740594 4 0 0 0 0 0.22862235233271663293 0 0
   Behaviors 1 1
 }
 Channel 5
@@ -2485,31 +2485,31 @@ NumChannels 6
 Channel 0
 { Envelope
   1
-  Key 0 0 0 0 0 0 0 -0.03883791718166094975 0
+  Key 0 0 0 0 0 0 0 -0.038837917181660956689 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 0.039999999105930328369 0 0 0 0 0 0 1.2649114293676639864 0
+  Key 0.039999999105930328369 0 0 0 0 0 0 1.2649114293676642085 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key -5.1250014305114746094 0 0 0 0 0 0 1.6629437524141117422 0
+  Key -5.1250014305114754976 0 0 0 0 0 0 1.6629437524141117422 0
   Behaviors 1 1
 }
 Channel 3
 { Envelope
   1
-  Key 0 0 0 0 0 0 0 0.17103040129780297529 0
+  Key 0 0 0 0 0 0 0 0.17103040129780294754 0
   Behaviors 1 1
 }
 Channel 4
 { Envelope
   1
-  Key -0.05061455070972442627 0 0 0 0 0 0 -1.0401433792787080357 0
+  Key -0.05061455070972442627 0 0 0 0 0 0 -1.0401433792787078136 0
   Behaviors 1 1
 }
 Channel 5
@@ -2615,10 +2615,10 @@ LightSamples 1
 DataOverlayLabel  
 OutputFilenameFormat 1
 SaveRGB 1
-SaveRGBImagesPrefix D:\DATA\Lightwave2019\Renders\Final_Render_
-RGBImageSaver LW_PNG24(.png)
+SaveRGBImagesPrefix D:\DEV\Lightwave\FFVectron\Renders\Final_Render_
+RGBImageSaver DeluxeRLA(.rla)
 SaveAlpha 0
-SaveAlphaImagesPrefix D:\DATA\Lightwave2019\Renders\Alpha_
+SaveAlphaImagesPrefix D:\DEV\Lightwave\FFVectron\Renders\Alpha_
 AlphaImageSaver LW_PNG24(.png)
 MultiLayerEnabled 0
 MultiLayerUseOutputPath 1
@@ -2699,4 +2699,4 @@ GraphEditorData
 ImageEditorData
 NumberOfClips 0
 
-ContentDir D:DATA/Lightwave2019
+ContentDir D:DEV/Lightwave/FFVectron

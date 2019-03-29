@@ -17,6 +17,8 @@ vec4 __operator__add__(vec4 a, vec4 b) { return vec4(a.x+b.x, a.y+b.y, a.z+b.z, 
 vec4 __operator__mul__(float val, vec4 v) { return vec4(val*v.x, val*v.y, val*v.z, val*v.w); }
 vec3 __operator__mul__(float val, vec3 v) { return vec3(val*v.x, val*v.y, val*v.z); }
 mat3 __operator__mul__(float val, mat3 m) { return mat3(val*m.m00, m.m01, m.m02, m.m10, val*m.m11, m.m12, m.m20, m.m21, val * m.m22); }
+vec3 __operator__add__(vec3 a, float b) { return vec3(a.x+b, a.y+b, a.z+b); }
+vec3 __operator__sub__(vec3 a, float b) { return vec3(a.x-b, a.y-b, a.z-b); }
 
 mat3  rotationMatrix3(vec3 v, float angle){ float c = cos(radians(angle)), s = sin(radians(angle)); return mat3(c+(1.0-c)*v.x*v.x, (1.0-c)*v.x*v.y-s*v.z, (1.0-c)*v.x*v.z+s*v.y,  (1.0-c)*v.x*v.y+s*v.z, c+(1.0-c)*v.y*v.y, (1.0-c)*v.y*v.z-s*v.x,  (1.0-c)*v.x*v.z-s*v.y, (1.0-c)*v.y*v.z+s*v.x, c+(1.0-c)*v.z*v.z); }
 
@@ -34,6 +36,18 @@ vec3 __operator__sub__(vec3 a, vec3 b) { return vec3(a.x-b.x, a.y-b.y, a.z-b.z);
 vec3 __operator__mul__(vec3 a, float b) { return vec3(a.x*b, a.y*b, a.z*b); }
 
 vec3 normalize(vec3 a) { return a/length(a); }
+float fract(float x) {
+	return x - floor(x); 
+}
+vec3 fract(vec3 a) { return vec3( fract(a.x), fract(a.y), fract(a.z) ); }
+
+float clamp(float x, float minVal, float maxVal) {
+	return x<minVal ? minVal : x > maxVal ? maxVal : x;
+}
+
+vec3 clamp(vec3 x, vec3 minVal, vec3 maxVal) { return vec3( clamp(x.x, minVal.x, maxVal.x), clamp(x.y, minVal.y, maxVal.y), clamp(x.z, minVal.z, maxVal.z) ); }
+vec3 clamp(vec3 x, vec4 minVal, vec4 maxVal) { return vec3( clamp(x.x, minVal.x, maxVal.x), clamp(x.y, minVal.y, maxVal.y), clamp(x.z, minVal.z, maxVal.z) ); }
+
 
 vec3 abs(vec3 a) { return vec3(fabs(a.x), fabs(a.y), fabs(a.z) ); }
 vec3 swap_xy(vec3 a) { 
