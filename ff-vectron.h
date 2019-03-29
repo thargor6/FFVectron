@@ -4,9 +4,9 @@ vector vec2(float a, float b) { return vector(a,b,0); }
 struct vec3{ float x, y, z; };
 struct vec4{ float x, y, z, w; };
 struct mat3{ float m00, m01, m02, m10, m11, m12, m20, m21, m22; };
-vector xyz(vec4 v) { return vector(v.x, v.y, v.z); }
-vector xyz(vec4 v) { return vector(v.x, v.y, v.z); }
-vector yzw(vec4 v) { return vector(v.y, v.z, v.w); }
+vec3 xyz(vec4 v) { return vec3(v.x, v.y, v.z); }
+vec3 xyz(vec4 v) { return vec3(v.x, v.y, v.z); }
+vec3 yzw(vec4 v) { return vec3(v.y, v.z, v.w); }
 
 mat3 __operator__mul__(mat3 A, mat3 B) { return mat3(A.m00*B.m00+A.m01*B.m10+A.m02*B.m20, A.m00*B.m01+A.m01*B.m11+A.m02*B.m21, A.m00*B.m02+A.m01*B.m12+A.m02*B.m22, A.m10*B.m00+A.m11*B.m10+A.m12*B.m20, A.m10*B.m01+A.m11*B.m11+A.m12*B.m21, A.m10*B.m02+A.m11*B.m12+A.m12*B.m22, A.m20*B.m00+A.m21*B.m10+A.m22*B.m20, A.m20*B.m01+A.m21*B.m11+A.m22*B.m21, A.m20*B.m02+A.m21*B.m12+A.m22*B.m22); }
 vec3 __operator__add__(vec3 a, vec3 b) { return vec3(a.x+b.x, a.y+b.y, a.z+b.z); }
@@ -29,6 +29,7 @@ float length(vec4 a) { return sqrt(a.x*a.x + a.y*a.y + a.z*a.z + a.w*a.w); }
 
 float dot(vec3 a, vec3 b) { return a.x*b.x + a.y*b.y + a.z*b.z; }
 float dot(vec4 a, vec4 b) { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
+vec3 cross(vec3 a, vec3 b) { return vec3(a.y*b.z - a.z * b.y, a.x*b.z-a.z*b.x, a.y*b.x - a.x*b.y  ); }
 float opS( float d1, float d2 ){ return max(-d2,d1); }
 vector opU( vector d1, vector d2 ){ return (d1[0]<d2[0]) ? d1 : d2; }
 vector opRep( vector p, vector c ){ return mod(p,c)-0.5*c; }
