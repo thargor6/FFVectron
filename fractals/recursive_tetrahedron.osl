@@ -1,0 +1,32 @@
+#include "octane-oslintrin.h"
+#include "ff-vectron.h"
+
+// recursive tetrahedron, based on the excellent article: http://blog.hvidtfeldts.net/index.php/2011/08/distance-estimated-3d-fractals-iii-folding-space/
+shader OslGeometry(int Iterations = 48, float Scale = 2.0, output _sdf c = _SDFDEF) {  
+  vec3 z = toVec3( P );
+  vec3 Offset = vec3(1, 1, 1);
+  int n = 0;
+  while (n < Iterations) {
+    // fold 1
+    if(z.x+z.y<0) {
+      float t = z.x;
+      z.x = -z.y;
+      z.y = -t; 
+    } 
+    // fold 2
+    if(z.x+z.z<0) {
+      float t = z.x;
+      z.x = -z.z; 
+      z.z = -t;
+    } 
+    // fold 3
+    if(z.y+z.z<0) {
+      float t = z.z;
+      z.z = -z.y;
+      z.y = -t; 
+    }
+    z = z*Scale - Offset*(Scale-1.0);
+    n++;
+  }
+  c.dist = length(z) * pow(Scale, float(-n));
+}
