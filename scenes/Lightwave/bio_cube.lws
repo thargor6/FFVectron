@@ -912,7 +912,7 @@ Plugin GlobalIlluminationHandler 1 MonteCarlo
         Tag "FORMAT" "Angle"
         { Value
           "double"
-          0.34906585039886589561
+          0.3490658503988658401
         }
       }
       { Attr
@@ -1169,7 +1169,7 @@ Plugin GlobalIlluminationHandler 2 MonteCarlo
         Tag "FORMAT" "Angle"
         { Value
           "double"
-          0.34906585039886589561
+          0.3490658503988658401
         }
       }
       { Attr
@@ -1644,7 +1644,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
 0
 { Volumetrics_NodeEditor
   { Root
-    Location -25 314
+    Location -25 300
     Zoom 0.76476187
     Disabled 1
   }
@@ -1667,7 +1667,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       Name "Octane OSL Node (1)"
       Coordinates -300 -180
       Mode 1
-      Selected 0
+      Selected 1
       { Data
         filename "\\fractals\\bio_cube.osl"
         node_type 3
@@ -2052,7 +2052,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       Name "Offset2X (1)"
       Coordinates 60 -200
       Mode 1
-      Selected 1
+      Selected 0
       { Data
         { Scalar
           { VariantParameter
@@ -2424,15 +2424,15 @@ Channel 0
 Channel 1
 { Envelope
   2
-  Key 2 0 0 0 0 0 0 1.6148873877421026091 0
-  Key 3.6149995326995845168 4 0 0 0 0 1.6148873877421026091 0 0
+  Key 2 0 0 0 0 0 0 1.6148873877421028311 0
+  Key 3.6149995326995845168 4 0 0 0 0 1.6148873877421028311 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   2
-  Key -2 0 0 0 0 0 0 -0.78907231474641259528 0
-  Key -2.7891271114349365234 4 0 0 0 0 -0.78907231474641259528 0 0
+  Key -2 0 0 0 0 0 0 -0.7890723147464127063 0
+  Key -2.7891271114349365234 4 0 0 0 0 -0.7890723147464127063 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -2445,8 +2445,8 @@ Channel 3
 Channel 4
 { Envelope
   2
-  Key 0.61086523819801519242 0 0 0 0 0 0 0.22862235233271685497 0
-  Key 0.83950346708297740594 4 0 0 0 0 0.22862235233271685497 0 0
+  Key 0.61086523819801519242 0 0 0 0 0 0 0.22862235233271679946 0
+  Key 0.83950346708297740594 4 0 0 0 0 0.22862235233271679946 0 0
   Behaviors 1 1
 }
 Channel 5
@@ -2616,25 +2616,25 @@ Channel 0
 Channel 1
 { Envelope
   1
-  Key -1.9399999380111694336 0 0 0 0 0 0 0 0
+  Key -1.9399999380111692115 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key -2.7800481319427490234 0 0 0 0 0 0 0 0
+  Key -2.7800481319427485793 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
 { Envelope
   1
-  Key -0.005235988181084394455 0 0 0 0 0 0 0 0
+  Key -0.0052359881810843935876 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 4
 { Envelope
   1
-  Key -0.7592182159423828125 0 0 0 0 0 0 0 0
+  Key -0.75921821594238270148 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 5
