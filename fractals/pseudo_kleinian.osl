@@ -1,9 +1,9 @@
 #include "octane-oslintrin.h"
 #include "ff-vectron.h"
 
-shader OslGeometry(int FoldingNumber = 7, output _sdf c = _SDFDEF) {
-  vec4 param_min = vec4(-0.8323, -0.694, -0.5045, 0.8067);
-  vec4 param_max = vec4(0.8579, 1.0883, 0.8937, 0.9411);
+shader OslGeometry(int FoldingNumber = 7, float minX = -0.8323, float minY =  -0.694, float minZ = -0.5045, float minW = 0.8067, float maxX = 0.8579, float maxY = 1.0883, float maxZ = 0.8937, float maxW = 0.9411, output _sdf c = _SDFDEF) {
+  vec4 param_min = vec4(minX, minY, minZ, minW);
+  vec4 param_max = vec4(maxX, maxY, maxZ, maxW);
   float k1, k2, rp2, rq2;
   float scale = 1.0;
   float orb = 1e4;
