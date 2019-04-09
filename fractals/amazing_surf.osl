@@ -1,0 +1,40 @@
+#include "octane-oslintrin.h"
+#include "ff-vectron.h"
+
+// based on amazingsurface.frag by Kali, http://www.fractalforums.com/index.php?action=downloads;sa=view;down=44
+shader OslGeometry(int FoldType = 1, int Iterations = 10, float FoldX = 1, float FoldY = 1, float RotAngle = 0, float RotVectorX = 1, float RotVectorY = 1, float RotVectorZ = 1, float Scale = 1.5, float MinRad2 = 0.25, float PreTranslateX = 0, float PreTranslateY = 0, float PreTranslateZ = 0, int JuliaMode = 0, float JuliaX = -1, float JuliaY = -1, float JuliaZ = -1, output _sdf c = _SDFDEF) {
+  vec2 FoldValues = vec2(FoldX, FoldY); 
+  vec3 PreTranslation = vec3(PreTranslateX, PreTranslateY, PreTranslateZ);
+  vec4 scale = vec4(Scale, Scale, Scale, abs(Scale));
+  vec3 RotVector = vec3(RotVectorX, RotVectorY, RotVectorZ);
+  mat3 rot = rotationMatrix3(normalize(RotVector), RotAngle);
+  float absScalem1 = abs(1-Scale);
+  float AbsScaleRaisedTo1mIters = pow(abs(Scale), float(1-Iterations));
+
+  vec4 p = vec4(P[0], P[1], P[2] ,1);
+  vec4 d;
+  if(JuliaMode!=0) {
+    d = vec4( JuliaX, JuliaY, JuliaZ, 1);
+  }
+  else {
+    d = p;  
+  }  
+  for (int i=0; i<Iterations; i++) {
+    if (FoldType==2) {
+      p = setXy( p, FoldValues-abs(abs(xy(p))-FoldValues) );
+    }
+    else if (FoldType==3) { 
+      p = setXy( p, abs(xy(p)+FoldValues) );
+    } 
+    else /*if (FoldType==1)*/ {
+      p = setXy( p, abs(xy(p)+FoldValues)-abs(xy(p)-FoldValues)-xy(p) );
+    }
+    p = setXyz( p, xyz(p) + PreTranslation );
+    float r2 = dot(xyz(p), xyz(p));
+    // if (i<ColorIterations) orbitTrap = min(orbitTrap, abs(vec4(p.xyz,r2)));
+    p*= scale/clamp(r2,MinRad2,1.0);
+    p+=d;
+    p = setXyz( p, xyz(p) * rot );
+  }
+  c.dist = ((length(xyz(p)) - absScalem1) / p.w - AbsScaleRaisedTo1mIters);
+}
