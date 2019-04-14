@@ -35,6 +35,4 @@ shader Mandelbulb(
 	}    
 	c.dist = 0.5*log(r)*r/dr;    
         APPLY_ORBIT_TRAP;
-
-
 }

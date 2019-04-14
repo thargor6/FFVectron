@@ -912,7 +912,7 @@ Plugin GlobalIlluminationHandler 1 MonteCarlo
         Tag "FORMAT" "Angle"
         { Value
           "double"
-          0.34906585039886589561
+          0.3490658503988658401
         }
       }
       { Attr
@@ -1169,7 +1169,7 @@ Plugin GlobalIlluminationHandler 2 MonteCarlo
         Tag "FORMAT" "Angle"
         { Value
           "double"
-          0.34906585039886589561
+          0.3490658503988658401
         }
       }
       { Attr
@@ -1435,7 +1435,7 @@ Channel 0
 Channel 1
 { Envelope
   1
-  Key 0.39500001072883605957 0 0 0 0 0 0 -0.39497258207730295831 0
+  Key 0.39500001072883605957 0 0 0 0 0 0 -0.39497258207730301383 0
   Behaviors 1 1
 }
 Channel 2
@@ -1447,37 +1447,37 @@ Channel 2
 Channel 3
 { Envelope
   1
-  Key 2.8553617000579833984 0 0 0 0 0 0 0 0
+  Key 3.1415927410125732422 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 4
 { Envelope
   1
-  Key 5.3546671867370605469 0 0 0 0 0 0 0 0
+  Key -1.218239903450012207 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 5
 { Envelope
   1
-  Key 1.5830132961273193359 0 0 0 0 0 0 0 0
+  Key 0.14311699569225311279 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 6
 { Envelope
   1
-  Key 1 0 0 0 0 0 0 0 0
+  Key 0.60000002384185791016 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 7
 { Envelope
   1
-  Key 1 0 0 0 0 0 0 0 0
+  Key 0.60000002384185791016 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 8
 { Envelope
   1
-  Key 1 0 0 0 0 0 0 0 0
+  Key 0.60000002384185791016 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 IKInitCustomFrame 0
@@ -1645,7 +1645,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
     { Tag
       RealName "Octane Volumetrics"
       Name "Octane Volumetrics"
-      Coordinates -740 80
+      Coordinates -820 100
       Mode 1
       Selected 0
       { Data
@@ -1656,7 +1656,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
     { Tag
       RealName "Octane OSL Node"
       Name "Octane OSL Node (1)"
-      Coordinates -300 100
+      Coordinates -200 200
       Mode 1
       Selected 0
       { Data
@@ -1669,14 +1669,14 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
     { Tag
       RealName "Octane Universal Material"
       Name "Octane Universal Material (1)"
-      Coordinates -440 180
+      Coordinates -500 200
       Mode 1
       Selected 0
       { Data
         ID_P_ALBEDO 1 1 1
         ID_P_METALLIC 0
         ID_P_BRDF 2
-        ID_P_SPECULAR 1
+        ID_P_SPECULAR 0.2
         ID_P_ROUGHNESS 0.063000001
         ID_P_ANISOTROPY 0
         ID_P_ROTATION 0
@@ -1724,7 +1724,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
             3
             0
             { ParameterValue
-              1
+              0.2
               0
             }
           }
@@ -2022,14 +2022,14 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       Name "FoldX (1)"
       Coordinates 0 300
       Mode 1
-      Selected 0
+      Selected 1
       { Data
         { Scalar
           { VariantParameter
             3
             0
             { ParameterValue
-              0.215
+              1
               0
             }
           }
@@ -2043,7 +2043,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       Name "Iterations (1)"
       Coordinates -40 340
       Mode 1
-      Selected 1
+      Selected 0
       { Data
         { Scalar
           { VariantParameter
@@ -2289,6 +2289,55 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       }
       Preview "Scalar"
     }
+    Server "Octane Texture Image"
+    { Tag
+      RealName "Octane Texture Image"
+      Name "Octane Texture Image (1)"
+      Coordinates -280 -260
+      Mode 1
+      Selected 0
+      { Data
+        { lw_image
+          { Clip
+            { Still
+              "scenes/gradient.png"
+            }
+            Flags 80
+          }
+        }
+        filename ""
+        power 1
+        gamma 2.2
+        scale 1 1 0
+        invert 0
+        node_type 0
+        translate 0 0 0
+        rotate 0
+        border_mode 0
+        raster_size 1
+        raster_hdr 0
+        raster_mirror 0
+        uv 0
+        bakedResolution 1024
+        bakedSamples 32
+        bakedType 0
+        bakedRBV 0
+        tilesU 1
+        tilesV 1
+        linearSpaceInvert 1
+        { v_power
+          { VariantParameter
+            3
+            0
+            { ParameterValue
+              1
+              0
+            }
+          }
+        }
+      }
+      Preview "Octane Image Texture"
+    }
   }
   { Connections
     NodeName "Octane Volumetrics"
@@ -2367,6 +2416,10 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
     InputName "JuliaZ"
     InputNodeName "JuliaZ (1)"
     InputOutputName "Scalar"
+    NodeName "Octane Universal Material (1)"
+    InputName "Albedo"
+    InputNodeName "Octane Texture Image (1)"
+    InputOutputName "Octane Image Texture"
   }
 }
 EndPlugin
@@ -2634,16 +2687,29 @@ mb_shutter 2
       }
       Preview "OCTANE ThinLens Camera"
     }
-    Server "Texture Environment"
+    Server "DayLight Environment"
     { Tag
-      RealName "Environment:Texture"
-      Name "Environment:Texture (1)"
-      Coordinates -100 -340
+      RealName "Environment:DayLight"
+      Name "Environment:DayLight (1)"
+      Coordinates -60 -260
       Mode 1
       Selected 1
       { Data
-        Texture 0.082352944 0.082352944 0.082352944
+        Longitude 0
+        Latitude 42
+        Day 1
+        Month 6
+        GMT_Offset 0
+        Hour 21.1
+        Turbidity 2.4000001
         Power 1
+        North_Offset 0
+        Type 0
+        SunDir 0.78539819 0.52359879 0
+        Model 1
+        SkyColor 0.050000001 0.30000001 1
+        SunsetColor 0.60000002 0.12 0.02
+        SunSize 1
         RotationX 0
         RotationY 0
         Importance_Sampling 1
@@ -2651,9 +2717,11 @@ mb_shutter 2
         Visible_Environment_Backplate 0
         Visible_Environment_Reflections 0
         Visible_Environment_Refractions 0
-        Pitch 0
+        Ground_Color 0 0 0
+        Ground_Start_Angle 1.5707964
+        Ground_Blend_Angle 0.08726646
       }
-      Preview "OCTANE Texture Environment"
+      Preview "OCTANE DayLight Environment"
     }
   }
   { Connections
@@ -2663,8 +2731,8 @@ mb_shutter 2
     InputOutputName "OCTANE ThinLens Camera"
     NodeName "Octane RenderTarget"
     InputName "Environment"
-    InputNodeName "Environment:Texture (1)"
-    InputOutputName "OCTANE Texture Environment"
+    InputNodeName "Environment:DayLight (1)"
+    InputOutputName "OCTANE DayLight Environment"
   }
 }
 cloud_sceneGuid ""
@@ -2683,19 +2751,19 @@ NumChannels 9
 Channel 0
 { Envelope
   1
-  Key -5.1436471939086914063 0 0 0 0 0 0 0.53490631514626663101 0
+  Key -5.1436471939086905181 0 0 0 0 0 0 0.53490631514626651999 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 2.9980287551879882813 0 0 0 0 0 0 1.614887387742102387 0
+  Key 2.9980287551879882813 0 0 0 0 0 0 1.6148873877421026091 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key -11.355029106140136719 0 0 0 0 0 0 -0.78907231474641248425 0
+  Key -11.355029106140134942 0 0 0 0 0 0 -0.78907231474641259528 0
   Behaviors 1 1
 }
 Channel 3
@@ -2707,7 +2775,7 @@ Channel 3
 Channel 4
 { Envelope
   1
-  Key 0.61086523532867431641 0 0 0 0 0 0 0.22862235233271688273 0
+  Key 0.61086523532867431641 0 0 0 0 0 0 0.22862235233271685497 0
   Behaviors 1 1
 }
 Channel 5
@@ -2867,37 +2935,37 @@ NumChannels 6
 Channel 0
 { Envelope
   1
-  Key -1.30994415283203125 0 0 0 0 0 0 -0.038837917181660956689 0
+  Key -0.56811976432800292969 0 0 0 0 0 0 -0.038837917181660956689 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 1.7051289081573486328 0 0 0 0 0 0 1.2649114293676642085 0
+  Key 2.3201296329498291016 0 0 0 0 0 0 1.2649114293676642085 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key -10.194994926452636719 0 0 0 0 0 0 1.6629437524141117422 0
+  Key -6.3535351753234863281 0 0 0 0 0 0 1.6629437524141117422 0
   Behaviors 1 1
 }
 Channel 3
 { Envelope
   1
-  Key 0.073303870856761932373 0 0 0 0 0 0 0.17103040129780294754 0
+  Key 0.048869259655475616455 0 0 0 0 0 0 0.17103040129780294754 0
   Behaviors 1 1
 }
 Channel 4
 { Envelope
   1
-  Key 0.27227124571800231934 0 0 0 0 0 0 -1.0401433792787078136 0
+  Key 0.35081094503402709961 0 0 0 0 0 0 -1.0401433792787078136 0
   Behaviors 1 1
 }
 Channel 5
 { Envelope
   1
-  Key 0.0017453292384743690491 0 0 0 0 0 0 -0.18499198369487823701 0
+  Key 0.05585053563117980957 0 0 0 0 0 0 -0.18499198369487823701 0
   Behaviors 1 1
 }
 IKInitCustomFrame 0
@@ -3079,6 +3147,12 @@ GraphEditorData
   1
 }
 ImageEditorData
-NumberOfClips 0
+NumberOfClips 1
+Clip 0
+{ ClipObject
+  "gradient.png"
+  128
+  0
+}
 
 ContentDir D:DEV/Lightwave/FFVectron
