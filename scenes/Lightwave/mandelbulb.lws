@@ -14,6 +14,8 @@ CurrentFrame 0
 FramesPerSecond 30
 AutoKeyFixedFrame 0
 ChangeScene 0
+Plugin MasterHandler 1 Octane_IPR
+EndPlugin
 Plugin ViewportObjectHandler 1 .VPR
 0
 20
@@ -1448,8 +1450,8 @@ Channel 2
 Channel 3
 { Envelope
   2
-  Key 0.2164208143949508667 0 0 0 0 0 0 0 0
-  Key 0.2164208143949508667 4 0 0 0 0 0 0 0
+  Key 0.21642081439495089445 0 0 0 0 0 0 0 0
+  Key 0.21642081439495089445 4 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 4
@@ -1642,8 +1644,8 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
 0
 { Volumetrics_NodeEditor
   { Root
-    Location -25 322
-    Zoom 0.87599999
+    Location -135 329
+    Zoom 0.85052484
     Disabled 1
   }
   Version 1
@@ -1652,7 +1654,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
     { Tag
       RealName "Octane Volumetrics"
       Name "Octane Volumetrics"
-      Coordinates -680 80
+      Coordinates -820 80
       Mode 1
       Selected 0
       { Data
@@ -1663,7 +1665,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
     { Tag
       RealName "Octane OSL Node"
       Name "Octane OSL Node (1)"
-      Coordinates -300 -220
+      Coordinates -440 -200
       Mode 1
       Selected 0
       { Data
@@ -1672,60 +1674,18 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       }
       Preview "Octane OSL Texture"
     }
-    Server "Scalar"
-    { Tag
-      RealName "Iterations"
-      Name "Iterations (1)"
-      Coordinates -100 100
-      Mode 1
-      Selected 0
-      { Data
-        { Scalar
-          { VariantParameter
-            3
-            0
-            { ParameterValue
-              8
-              0
-            }
-          }
-        }
-      }
-      Preview "Scalar"
-    }
-    Server "Scalar"
-    { Tag
-      RealName "Power"
-      Name "Power (1)"
-      Coordinates -100 0
-      Mode 1
-      Selected 0
-      { Data
-        { Scalar
-          { VariantParameter
-            3
-            0
-            { ParameterValue
-              8
-              0
-            }
-          }
-        }
-      }
-      Preview "Scalar"
-    }
     Server "Octane Universal Material"
     { Tag
       RealName "Octane Universal Material"
       Name "Octane Universal Material (1)"
-      Coordinates -300 360
+      Coordinates -440 380
       Mode 1
-      Selected 1
+      Selected 0
       { Data
         ID_P_ALBEDO 1 1 1
         ID_P_METALLIC 0
         ID_P_BRDF 2
-        ID_P_SPECULAR 1
+        ID_P_SPECULAR 0.2
         ID_P_ROUGHNESS 0.063000001
         ID_P_ANISOTROPY 0
         ID_P_ROTATION 0
@@ -1773,7 +1733,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
             3
             0
             { ParameterValue
-              1
+              0.2
               0
             }
           }
@@ -1981,6 +1941,55 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       }
       Preview "Octane Universal Material"
     }
+    Server "Octane Texture Image"
+    { Tag
+      RealName "Octane Texture Image"
+      Name "Octane Texture Image (1)"
+      Coordinates -100 160
+      Mode 1
+      Selected 1
+      { Data
+        { lw_image
+          { Clip
+            { Still
+              "scenes/gradient.png"
+            }
+            Flags 80
+          }
+        }
+        filename ""
+        power 1
+        gamma 2.2
+        scale 1 1 0
+        invert 0
+        node_type 0
+        translate 0 0 0
+        rotate 0
+        border_mode 0
+        raster_size 1
+        raster_hdr 0
+        raster_mirror 0
+        uv 0
+        bakedResolution 1024
+        bakedSamples 32
+        bakedType 0
+        bakedRBV 0
+        tilesU 1
+        tilesV 1
+        linearSpaceInvert 1
+        { v_power
+          { VariantParameter
+            3
+            0
+            { ParameterValue
+              1
+              0
+            }
+          }
+        }
+      }
+      Preview "Octane Image Texture"
+    }
   }
   { Connections
     NodeName "Octane Volumetrics"
@@ -1991,14 +2000,10 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
     InputName "SDF OSL Vectron"
     InputNodeName "Octane OSL Node (1)"
     InputOutputName "Octane OSL Vectron"
-    NodeName "Octane OSL Node (1)"
-    InputName "Iterations"
-    InputNodeName "Iterations (1)"
-    InputOutputName "Scalar"
-    NodeName "Octane OSL Node (1)"
-    InputName "Power"
-    InputNodeName "Power (1)"
-    InputOutputName "Scalar"
+    NodeName "Octane Universal Material (1)"
+    InputName "Albedo"
+    InputNodeName "Octane Texture Image (1)"
+    InputOutputName "Octane Image Texture"
   }
 }
 EndPlugin
@@ -2315,22 +2320,22 @@ NumChannels 9
 Channel 0
 { Envelope
   2
-  Key -2 0 0 0 0 0 0 0.53490631514626663101 0
-  Key -1.4650565385818481445 4 0 0 0 0 0.53490631514626663101 0 0
+  Key -2 0 0 0 0 0 0 0.53490631514626651999 0
+  Key -1.4650565385818481445 4 0 0 0 0 0.53490631514626651999 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   2
-  Key 2 0 0 0 0 0 0 1.614887387742102387 0
-  Key 3.6149995326995845168 4 0 0 0 0 1.614887387742102387 0 0
+  Key 2 0 0 0 0 0 0 1.6148873877421028311 0
+  Key 3.6149995326995845168 4 0 0 0 0 1.6148873877421028311 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   2
-  Key -2 0 0 0 0 0 0 -0.78907231474641248425 0
-  Key -2.7891271114349365234 4 0 0 0 0 -0.78907231474641248425 0 0
+  Key -2 0 0 0 0 0 0 -0.7890723147464127063 0
+  Key -2.7891271114349365234 4 0 0 0 0 -0.7890723147464127063 0 0
   Behaviors 1 1
 }
 Channel 3
@@ -2343,8 +2348,8 @@ Channel 3
 Channel 4
 { Envelope
   2
-  Key 0.61086523819801519242 0 0 0 0 0 0 0.22862235233271688273 0
-  Key 0.83950346708297740594 4 0 0 0 0 0.22862235233271688273 0 0
+  Key 0.61086523819801519242 0 0 0 0 0 0 0.22862235233271679946 0
+  Key 0.83950346708297740594 4 0 0 0 0 0.22862235233271679946 0 0
   Behaviors 1 1
 }
 Channel 5
@@ -2514,19 +2519,19 @@ Channel 0
 Channel 1
 { Envelope
   1
-  Key 1.2649999856948852539 0 0 0 0 0 0 0 0
+  Key 1.2649999856948848098 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key -3.6949000358581542969 0 0 0 0 0 0 0 0
+  Key -3.6949000358581534087 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
 { Envelope
   1
-  Key -0.005235988181084394455 0 0 0 0 0 0 0 0
+  Key -0.0052359881810843935876 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 4
@@ -2720,6 +2725,18 @@ GraphEditorData
   1
 }
 ImageEditorData
-NumberOfClips 0
+NumberOfClips 2
+Clip 0
+{ ClipObject
+  "gradient2.png"
+  128
+  0
+}
+Clip 1
+{ ClipObject
+  "gradient.png"
+  128
+  0
+}
 
 ContentDir D:DEV/Lightwave/FFVectron

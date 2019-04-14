@@ -9,6 +9,7 @@ struct vec2{ float x, y; };
 vec2 __operator__add__(vec2 a, vec2 b) { return vec2(a.x+b.x, a.y+b.y); }
 vec2 __operator__sub__(vec2 a, vec2 b) { return vec2(a.x-b.x, a.y-b.y); }
 vec2 abs(vec2 a) { return vec2(fabs(a.x), fabs(a.y) ); }
+float length(vec2 a) { return sqrt(a.x*a.x + a.y*a.y); }
 // ------------------------------------------ vec3 ---------------------------------------------------
 struct vec3{ float x, y, z; };
 
@@ -30,8 +31,12 @@ vec3 clamp(vec3 x, vec3 minVal, vec3 maxVal) { return vec3( clamp(x.x, minVal.x,
 vec3 abs(vec3 a) { return vec3(fabs(a.x), fabs(a.y), fabs(a.z) ); }
 vec3 swap_xy(vec3 a) { return vec3(a.y, a.x, a.z ); }
 vec3 swap_xz(vec3 a) { return vec3(a.z, a.y, a.x ); }
+vec3 min(vec3 x, float v) { return vec3( min(x.x, v), min(x.y, v), min(x.z, v) ); }
+vec3 max(vec3 x, float v) { return vec3( max(x.x, v), max(x.y, v), max(x.z, v) ); }
+vec2 xy(vec3 v) { return vec2(v.x, v.y); }
 // ------------------------------------------ vec4 ---------------------------------------------------
 struct vec4{ float x, y, z, w; };
+
 float length(vec4 a) { return sqrt(a.x*a.x + a.y*a.y + a.z*a.z + a.w*a.w); }
 float dot(vec4 a, vec4 b) { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
 vec4 __operator__div__(vec4 a, float b) { return vec4(a.x/b, a.y/b, a.z/b, a.w/b); }
@@ -49,6 +54,15 @@ vec4 setXyz(vec4 src, vec3 v) { return vec4(v.x, v.y, v.z, src.w ); }
 vec4 __operator__add__(vec4 a, vec4 b) { return vec4(a.x+b.x, a.y+b.y, a.z+b.z, a.w+b.w); }
 vec4 __operator__mul__(float val, vec4 v) { return vec4(val*v.x, val*v.y, val*v.z, val*v.w); }
 vec3 clamp(vec3 x, vec4 minVal, vec4 maxVal) { return vec3( clamp(x.x, minVal.x, maxVal.x), clamp(x.y, minVal.y, maxVal.y), clamp(x.z, minVal.z, maxVal.z) ); }
+vec4 abs(vec4 a) { return vec4(fabs(a.x), fabs(a.y), fabs(a.z), fabs(a.w) ); }
+vec4 min(vec4 x, float v) { return vec4( min(x.x, v), min(x.y, v), min(x.z, v), min(x.w, v) ); }
+vec4 max(vec4 x, float v) { return vec4( max(x.x, v), max(x.y, v), max(x.z, v), max(x.w, v) ); }
+vec4 min(vec4 x, vec4 y) { return vec4( min(x.x, y.x), min(x.y, y.y), min(x.z, y.z), min(x.w, y.w) ); }
+
+
+vec4 toVec4(vec3 v3, float s) { return vec4(v3.x, v3.y, v3.z, s); }	
+vec4 toVec4(float s, vec3 v3) { return vec4(s, v3.x, v3.y, v3.z); }	
+vec4 toVec4(float s) { return vec4(s, s, s, s); }	
 // ------------------------------------------ mat3 ---------------------------------------------------
 struct mat3{ float m00, m01, m02, m10, m11, m12, m20, m21, m22; };
 mat3 __operator__mul__(float val, mat3 m) { return mat3(val*m.m00, m.m01, m.m02, m.m10, val*m.m11, m.m12, m.m20, m.m21, val * m.m22); }
@@ -59,3 +73,23 @@ vec3 __operator__mul__(vec3 v, mat3 m) { return vec3(v.x*m.m00+v.y*m.m01+v.z*m.m
 float opS( float d1, float d2 ){ return max(-d2,d1); }
 vector opU( vector d1, vector d2 ){ return (d1[0]<d2[0]) ? d1 : d2; }
 vector opRep( vector p, vector c ){ return mod(p,c)-0.5*c; }
+// --------------------------------------- coloring --------------------------------------------------
+#define UV_MODE_SQRT 0
+#define UV_MODE_LOG 1
+#define UV_MODE_CONST 2
+#define UV_MODE_NONE 3
+
+#define ADD_COLOR_PARAMS int ColorIterations = 16, int UMode = UV_MODE_SQRT, float UScale = 2, int VMode = UV_MODE_SQRT, float VScale = 2
+#define INIT_ORBIT_TRAP float orbitTrap = 10000.0
+#define APPLY_ORBIT_TRAP         if(UMode==UV_MODE_SQRT)  \
+          c.u = sqrt(orbitTrap) * UScale; \
+        else if(UMode==UV_MODE_LOG)  \
+          c.u = log(orbitTrap) * UScale; \
+        else if(UMode==UV_MODE_CONST) \
+          c.u = UScale; \
+        if(VMode==UV_MODE_SQRT)  \
+          c.v = sqrt(orbitTrap) * VScale; \
+        else if(VMode==UV_MODE_LOG)  \
+          c.v = log(orbitTrap) * VScale;\
+        else if(VMode==UV_MODE_CONST)\
+          c.v = VScale
