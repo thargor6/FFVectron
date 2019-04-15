@@ -1,7 +1,11 @@
 #include "octane-oslintrin.h"
 #include "ff-vectron.h"
 
-shader OslGeometry(int FoldingNumber = 7, float minX = -0.8323, float minY =  -0.694, float minZ = -0.5045, float minW = 0.8067, float maxX = 0.8579, float maxY = 1.0883, float maxZ = 0.8937, float maxW = 0.9411, output _sdf c = _SDFDEF) {
+shader PseudoKleinian(int FoldingNumber = 7, 
+float minX = -0.8323, float minY =  -0.694, float minZ = -0.5045, float minW = 0.8067, 
+float maxX = 0.8579, float maxY = 1.0883, float maxZ = 0.8937, float maxW = 0.9411, 
+ADD_COLOR_PARAMS,
+output _sdf c = _SDFDEF) {
   vec4 param_min = vec4(minX, minY, minZ, minW);
   vec4 param_max = vec4(maxX, maxY, maxZ, maxW);
   float k1, k2, rp2, rq2;
@@ -9,6 +13,7 @@ shader OslGeometry(int FoldingNumber = 7, float minX = -0.8323, float minY =  -0
   float orb = 1e4;
   vec3 p = toVec3(P);
   vec3 q = toVec3(P);
+  INIT_ORBIT_TRAP;
 
   for (int i = 0; i < FoldingNumber; i++) {
     p = 2.0 * clamp(p, param_min, param_max) - p;
@@ -20,7 +25,11 @@ shader OslGeometry(int FoldingNumber = 7, float minX = -0.8323, float minY =  -0
     p *= k1;
     q *= k2;
     scale *= k1;
+    float r = length(p);
+    if (i<ColorIterations) 
+      orbitTrap = min(orbitTrap, r*r);
   }
   float lxy = sqrt(p.x*p.x+p.y*p.y);
   c.dist = 0.5 * max(param_max.w - lxy, lxy * p.z / length(p)) / scale;
+  APPLY_ORBIT_TRAP;
 }
