@@ -2,19 +2,24 @@
 #include "ff-vectron.h"
 
 // based on QuaternionJulia.frag from Fragmentarium, http://syntopia.github.io/Fragmentarium/
-shader OslGeometry(int Iterations = 16, float Threshold = 10.0, float Cx = 0.18, float Cy = 0.88, float Cz = 0.24, float Cw = 0.16, output _sdf c = _SDFDEF) {  
+shader OslGeometry(int Iterations = 16, float Threshold = 10.0, float Cx = 0.18, float Cy = 0.88, float Cz = 0.24, float Cw = 0.16, 
+ADD_COLOR_PARAMS,
+output _sdf c = _SDFDEF) {  
   vec4 C = vec4(Cx, Cy, Cz, Cw);
   vec4 p = vec4(P[0], P[1], P[2], 0.0);
   vec4 dp = vec4(1.0, 0.0,0.0,0.0);
+  INIT_ORBIT_TRAP;
   for (int i = 0; i < Iterations; i++) {
     vec3 t = p.x*yzw(dp)+dp.x*yzw(p)+cross(yzw(p), yzw(dp));
     dp = 2.0* vec4(p.x*dp.x-dot(yzw(p), yzw(dp)), t.x, t.y, t.z );
     vec3 u = 2.0*p.x*yzw(p);
     p = vec4(p.x*p.x-dot(yzw(p), yzw(p)), u.x, u.y, u.z) + C;
     float p2 = dot(p,p);
-    //orbitTrap = min(orbitTrap, abs(vec4(xyz(p),p2,0,0)));
+    if (i<ColorIterations) 
+      orbitTrap = min(orbitTrap, abs(p2));
     if (p2 > Threshold) break;
   }
   float r = length(p);
   c.dist = 0.5 * r * log(r) / length(dp);
+  APPLY_ORBIT_TRAP;
 }

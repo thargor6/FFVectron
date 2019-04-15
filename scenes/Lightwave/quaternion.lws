@@ -912,7 +912,7 @@ Plugin GlobalIlluminationHandler 1 MonteCarlo
         Tag "FORMAT" "Angle"
         { Value
           "double"
-          0.34906585039886589561
+          0.3490658503988658401
         }
       }
       { Attr
@@ -1169,7 +1169,7 @@ Plugin GlobalIlluminationHandler 2 MonteCarlo
         Tag "FORMAT" "Angle"
         { Value
           "double"
-          0.34906585039886589561
+          0.3490658503988658401
         }
       }
       { Attr
@@ -1722,7 +1722,7 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       Name "Octane Universal Material (1)"
       Coordinates -360 300
       Mode 1
-      Selected 1
+      Selected 0
       { Data
         ID_P_ALBEDO 1 1 1
         ID_P_METALLIC 0
@@ -1983,6 +1983,55 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
       }
       Preview "Octane Universal Material"
     }
+    Server "Octane Texture Image"
+    { Tag
+      RealName "Octane Texture Image"
+      Name "Octane Texture Image (1)"
+      Coordinates 20 280
+      Mode 1
+      Selected 1
+      { Data
+        { lw_image
+          { Clip
+            { Still
+              "scenes/gradient.png"
+            }
+            Flags 80
+          }
+        }
+        filename ""
+        power 1
+        gamma 2.2
+        scale 1 1 0
+        invert 0
+        node_type 0
+        translate 0 0 0
+        rotate 0
+        border_mode 0
+        raster_size 1
+        raster_hdr 0
+        raster_mirror 0
+        uv 0
+        bakedResolution 1024
+        bakedSamples 32
+        bakedType 0
+        bakedRBV 0
+        tilesU 1
+        tilesV 1
+        linearSpaceInvert 1
+        { v_power
+          { VariantParameter
+            3
+            0
+            { ParameterValue
+              1
+              0
+            }
+          }
+        }
+      }
+      Preview "Octane Image Texture"
+    }
   }
   { Connections
     NodeName "Octane Volumetrics"
@@ -2001,6 +2050,10 @@ Plugin CustomObjHandler 1 Octane_Volumetrics
     InputName "Cw"
     InputNodeName "Cw (1)"
     InputOutputName "Scalar"
+    NodeName "Octane Universal Material (1)"
+    InputName "Albedo"
+    InputNodeName "Octane Texture Image (1)"
+    InputOutputName "Octane Image Texture"
   }
 }
 EndPlugin
@@ -2144,7 +2197,7 @@ Channel 0
 Channel 1
 { Envelope
   1
-  Key 0 0 0 0 0 0 0 0 0
+  Key -0.1895472109317779541 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
@@ -2603,15 +2656,15 @@ NumChannels 9
 Channel 0
 { Envelope
   2
-  Key -2.5636043548583984375 0 0 0 0 0 0 1.0984715335311661111 0
+  Key -2.5636043548583979934 0 0 0 0 0 0 1.0984715335311661111 0
   Key -1.4650565385818481445 4 0 0 0 0 1.0984715335311661111 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   2
-  Key 4.5900025367736816406 0 0 0 0 0 0 -0.97493530023380303717 0
-  Key 3.6149995326995845168 4 0 0 0 0 -0.97493530023380303717 0 0
+  Key 4.5900025367736816406 0 0 0 0 0 0 -0.97493530023380292615 0
+  Key 3.6149995326995845168 4 0 0 0 0 -0.97493530023380292615 0 0
   Behaviors 1 1
 }
 Channel 2
@@ -2631,8 +2684,8 @@ Channel 3
 Channel 4
 { Envelope
   2
-  Key 0.61086523532867431641 0 0 0 0 0 0 0.22862235233271685497 0
-  Key 0.83950346708297740594 4 0 0 0 0 0.22862235233271685497 0 0
+  Key 0.61086523532867431641 0 0 0 0 0 0 0.22862235233271679946 0
+  Key 0.83950346708297740594 4 0 0 0 0 0.22862235233271679946 0 0
   Behaviors 1 1
 }
 Channel 5
@@ -2796,31 +2849,31 @@ NumChannels 6
 Channel 0
 { Envelope
   1
-  Key -0.0014927489683032035828 0 0 0 0 0 0 0 0
+  Key 0.098973587155342102051 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 1
 { Envelope
   1
-  Key 1.6999994516372680664 0 0 0 0 0 0 0 0
+  Key 2.5350029468536376953 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 2
 { Envelope
   1
-  Key -3.0748827457427978516 0 0 0 0 0 0 0 0
+  Key -2.9364769458770751953 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 3
 { Envelope
   1
-  Key -0.026179928332567214966 0 0 0 0 0 0 0 0
+  Key -0.012217285111546516418 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 4
 { Envelope
   1
-  Key 0.44680455327033996582 0 0 0 0 0 0 0 0
+  Key 0.67544347047805786133 0 0 0 0 0 0 0 0
   Behaviors 1 1
 }
 Channel 5
@@ -3008,6 +3061,12 @@ GraphEditorData
   1
 }
 ImageEditorData
-NumberOfClips 0
+NumberOfClips 1
+Clip 0
+{ ClipObject
+  "gradient.png"
+  128
+  0
+}
 
 ContentDir D:DEV/Lightwave/FFVectron
