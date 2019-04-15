@@ -1,0 +1,200 @@
+#include "octane-oslintrin.h"
+#include "ff-vectron.h"
+
+// provided by Jesus Josa
+// GregHelt:mandelbox paper https://arxiv.org/ftp/arxiv/papers/1809/1809.01720.pdf
+// https://github.com/GreggHelt2/fractalfrags/tree/master/fragmentarium/bridges_2018_mandelbox_paper
+
+struct Shape {
+  int type;
+  float scale;
+  vec4 center;
+  float a; // additional shape param (only used by some shapes)
+};
+
+float getShape2CenterSqr(vec4 p, Shape s) {
+  vec4 intersectP;
+  float idistance2 = 1.0; // square of distance from origin to intersection of shape boundary along ray from origin through point P
+  if (s.type == 0) { // hypersphere
+    idistance2 =  s.scale * s.scale;
+  }
+  else if (s.type == 1) {  // hypercube
+    if (p.x == 0.0 && p.y == 0.0 && p.z == 0.0 && p.w == 0.0) {
+      //intersectP.xyzw = p.xyzw;
+	  intersectP = p;
+      idistance2 = dot(intersectP, intersectP);
+    }
+    else {
+      float maxdim = max(abs(p.x), max(abs(p.y), max(abs(p.z), abs(p.w))));
+	  vec4 t;
+	  t=p/maxdim;
+      intersectP = t * s.scale;
+      idistance2 =  dot(intersectP, intersectP);
+    }
+  }
+  else if (s.type == 2 || s.type == 3) {  // union or intersection of hypercube and hypersphere
+    if (p.x == 0.0 && p.y == 0.0 && p.z == 0.0 && p.w == 0.0) { idistance2 = 0.0; }
+    else {
+      float maxdim = max(abs(p.x), max(abs(p.y), max(abs(p.z), abs(p.w))));
+      vec4 box_intersect = (p / maxdim) * s.scale;
+      float boxd2 = dot(box_intersect,box_intersect);
+      float sphered2 = s.a * s.a * s.scale * s.scale;
+
+      if (s.type == 2) {  // union
+	idistance2 = max(boxd2, sphered2);
+      }
+      else if (s.type == 3) { // intersection
+        idistance2 = min(boxd2, sphered2);
+      }
+    }
+  }
+  else if (s.type == 4) {  // blend diff of cube and sphere inscribed in cube (sphere touches center of cube faces)
+    // ParamA controls blend contribution from hypercube and hypersphere
+    // blend = (a * distance(hypercube)) + ((1-a) * distance(hypersphere))
+    // A = 0 ==> hypersphere
+    // A = 1 ==> hypercube
+    // 0 < A < 1 ==> blend in between hypersphere and hypercube surface
+    // A < 0 || A > 1 ==> overdriven blends
+    float maxdim = max(abs(p.x), max(abs(p.y), max(abs(p.z), abs(p.w))));
+    vec4 box_intersect = (p / maxdim) * s.scale;
+    float boxd2 = dot(box_intersect,box_intersect);
+    float sphere_distance = s.scale;
+    float box_distance = sqrt(boxd2);
+    float sdistance = (1.0-s.a)*sphere_distance + s.a*box_distance;
+    idistance2 = sdistance * sdistance;
+  }
+  else {  // out of range for ShapeTypes
+    idistance2 =  s.scale;
+  }
+  return idistance2;
+}
+
+// modified inversion fold that can use shapes other than circles
+void shapeFold(inout vec4 p, inout float der,Shape minShape,Shape invShape,int InnerMode,float	MinScalingConstant) {
+  vec4 minp = p;
+
+  // get point position _relative_ to shape center
+  p -= invShape.center;
+  minp -= minShape.center;
+
+  // get distance from point P to center of invShape, minShape, maxShape
+  float p2InvCenterSqr = dot(p,p);
+  float p2MinCenterSqr = dot(minp, minp);
+
+  // get point of intersection S with surface of shape (along a ray from shape center to point P)
+  float s2InvCenterSqr = getShape2CenterSqr(p, invShape);
+  float s2MinCenterSqr = getShape2CenterSqr(minp, minShape);
+
+  // determine if point P is inside invShape, minShape
+ // bool insideMinShape =(p2MinCenterSqr < s2MinCenterSqr);
+ // bool insideInvShape =(p2InvCenterSqr < s2InvCenterSqr);
+
+  float ratio = 1.0;
+  if (p2MinCenterSqr < s2MinCenterSqr) {
+    if (InnerMode == 0) { // scaling varies based on intersection with inv and min boundaries
+      //   do inversion _but_ as if point were at edge of min shape
+      ratio = s2InvCenterSqr/s2MinCenterSqr;
+    }
+    else if (InnerMode == 1) { // scaling is constant based on invShape and minShape scales
+      ratio = (invShape.scale * invShape.scale) / (minShape.scale * minShape.scale);
+    }
+    else if (InnerMode == 2) { // scaling varies based on invShape scale and minShape intersection
+      ratio = (invShape.scale * invShape.scale) /s2MinCenterSqr;
+    }
+    else if (InnerMode == 3) { // scaling varies based on invShape intersection and minShape scale
+      ratio = s2InvCenterSqr/ (minShape.scale * minShape.scale);
+    }
+    // if InnerMode == 4, just use MinScalingConstant
+    // testing an additional scaling constant 
+    ratio *= MinScalingConstant;
+    der *= ratio;
+    p *= ratio;
+  }
+  else if (p2InvCenterSqr < s2InvCenterSqr) {
+    // if point is outside minShape but within invShape, do shape inversion relative to invShape
+    ratio = s2InvCenterSqr/p2InvCenterSqr;
+    p *= ratio;
+    der *= ratio;
+  }
+  // get absolute point position (reverse offset relative to shape center)
+  p += invShape.center;
+}
+
+// standard Mandelbox box fold in 4D
+void boxFold(inout vec4 p, inout float der,float BoxFoldLimit) {
+  // fold x
+  if (p.x > BoxFoldLimit) { p.x = 2.0*BoxFoldLimit - p.x; } 
+  else if (p.x < -BoxFoldLimit) { p.x = -2.0*BoxFoldLimit - p.x; }
+  // fold y
+  if (p.y > BoxFoldLimit) { p.y = 2.0*BoxFoldLimit - p.y; }
+  else if (p.y < -BoxFoldLimit) { p.y = -2.0*BoxFoldLimit -p.y; }
+  // fold z
+  if (p.z > BoxFoldLimit) { p.z = 2.0*BoxFoldLimit - p.z; }
+  else if (p.z < -BoxFoldLimit) { p.z = -2.0*BoxFoldLimit - p.z; }
+  // fold w
+  if (p.w > BoxFoldLimit) { p.w = 2.0*BoxFoldLimit - p.w; }
+  else if (p.w < -BoxFoldLimit) { p.w = -2.0*BoxFoldLimit  - p.w; }
+}
+
+shader manboxshapeinv(
+int	Iterations = 21,
+float	Bailout = 1000,
+float	BoxFoldLimit = 0.9545455,
+float	InvScale = 2.080727,
+float 	InvCenterX = 0,
+float 	InvCenterY = 0,
+float 	InvCenterZ = 0.1154684,
+float 	InvCenterW = 0.0980392,
+float	InvParamA = 0.9487522,
+float	MinScale = 1.171011,
+float 	MinCenterX = 0,
+float 	MinCenterY = 0,
+float 	MinCenterZ = 0,
+float 	MinCenterW = 0,
+float	MinParamA = 0.1469933,
+float	Scale = 2.134021,
+float	MinScalingConstant = 1,
+float	OffsetW = -1.722512,
+int	InvType = 3,
+int	MinType = 0,
+int	InnerMode = 0,
+ADD_COLOR_PARAMS,
+output _sdf c = _SDFDEF)
+{
+
+vec4	InvCenter = vec4(InvCenterX, InvCenterY, InvCenterZ, InvCenterW);
+vec4	MinCenter = vec4(MinCenterX, MinCenterY, MinCenterZ, MinCenterW);
+
+
+
+  Shape invShape = Shape(InvType,
+		   InvScale,
+		   InvCenter,
+		   InvParamA);
+  Shape minShape = Shape(MinType,
+		   MinScale, 
+		   MinCenter,
+		   MinParamA);
+		   
+float absScalem1 = abs(Scale - 1.0);
+float AbsScaleRaisedTo1mIters = pow(abs(Scale), float(1-Iterations));
+INIT_ORBIT_TRAP;
+vec4 p4d = vec4(P[0], P[1], P[2], OffsetW);
+  vec4 offset = p4d;
+    float dr = 1.0;
+  float distance2 = 0.0;
+   for (int i = 0; i < Iterations; i++) {
+    boxFold(p4d,dr,BoxFoldLimit);      
+    if (i < ColorIterations) {
+      float d2 = dot(xyz(p4d), xyz(p4d));
+      orbitTrap = min(orbitTrap, abs(d2));
+    }
+	  shapeFold(p4d,dr,minShape,invShape,InnerMode,MinScalingConstant);  
+    p4d = (p4d * Scale) + offset; 
+    dr = (dr * abs(Scale)) + 1.0;
+    distance2 = dot(p4d,p4d);
+    if (distance2 > Bailout) { break; }
+  }
+  c.dist= ((sqrt(distance2) - absScalem1) / abs(dr)) - AbsScaleRaisedTo1mIters;
+  APPLY_ORBIT_TRAP;
+}

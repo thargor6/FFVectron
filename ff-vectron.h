@@ -40,7 +40,10 @@ struct vec4{ float x, y, z, w; };
 float length(vec4 a) { return sqrt(a.x*a.x + a.y*a.y + a.z*a.z + a.w*a.w); }
 float dot(vec4 a, vec4 b) { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
 vec4 __operator__div__(vec4 a, float b) { return vec4(a.x/b, a.y/b, a.z/b, a.w/b); }
+vec4 __operator__mul__(vec4 a, float b) { return vec4(a.x*b, a.y*b, a.z*b, a.w*b); }
 vec4 __operator__mul__(vec4 a, vec4 b) { return vec4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w); }
+vec4 __operator__add__(vec4 a, vec4 b) { return vec4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
+vec4 __operator__sub__(vec4 a, vec4 b) { return vec4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
 
 vec3 xyz(vec4 v) { return vec3(v.x, v.y, v.z); }
 vec3 xyz(vec4 v) { return vec3(v.x, v.y, v.z); }
