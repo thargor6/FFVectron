@@ -1,0 +1,71 @@
+//
+//Formula by knighty 
+//http://www.fractalforums.com/programming/project-a-cube-into-a-sphere-(not-riemann's-way)/msg66543/#msg66543
+//
+//
+#include "octane-oslintrin.h"
+#include "ff-vectron.h"
+
+vec3 swap_yz(vec3 a) { return vec3(a.x, a.z, a.y ); }
+
+vec3 __operator__mul__(mat3  m,vec3 v ) { return vec3(v.x*m.m00+v.y*m.m10+v.z*m.m20, v.x*m.m01+v.y*m.m11+v.z*m.m21, v.x*m.m02+v.y*m.m12+v.z*m.m22); }
+
+shader mengersphere(
+int Iterations = 10,
+float Scale = 3,
+int sphere=1,
+float RotVectorX= 1,
+float RotVectorY= 0,
+float RotVectorZ= 0,
+float RotAngle = 0,
+float OffsetX= 1,
+float OffsetY= 1,
+float OffsetZ= 1,
+ADD_COLOR_PARAMS,
+//output _sdf c = _SDFDEF)
+  output float dist=0.)
+{
+     vec3 RotVector=vec3(RotVectorX,RotVectorY,RotVectorZ);
+     vec3 Offset=vec3(OffsetX,OffsetY,OffsetZ);
+
+     vec3  p=vec3(P[0],P[1],P[2]);
+     INIT_ORBIT_TRAP;
+	mat3 rot = rotationMatrix3(normalize(RotVector), RotAngle);
+	vec3 o=abs(Offset);
+	float sc = max(o.x,max(o.y,o.z));
+	float sr=sqrt(dot(o,o)+1.);
+        if (sphere==1)
+       {
+        vec3 ap=abs(p);
+	float Linf=max(max(ap.x,ap.y),ap.z);//infinity norm
+	float L2=length(p);//euclidean norm
+	float multiplier=L2/Linf;
+	p*=multiplier;//Spherify transform.
+	float dd=multiplier*1.6;//to correct the DE. Found by try and error. there should be better formula.
+       }
+       else
+	  float dd=1.;
+
+	float r2=dot(p,p);
+	for(int i = 0; i<Iterations && r2<100.; i++){
+		p=abs(p);
+		if(p.y>p.x) p=swap_xy(p);
+      		if(p.z>p.y) p=swap_yz(p);
+      		if(p.y>p.x) p=swap_xy(p);
+		p.z=abs(p.z-1./3.*Offset.z)+1./3.*Offset.z;
+		p=p*Scale-Offset*(Scale-1.); dd*=Scale;
+		p=rot*p;
+		r2=dot(p,p);	
+	}
+      if (sphere==1)
+      {
+	dist= (sqrt(r2)-sr)/dd;//bounding volume is a sphere
+//	c.dist= (sqrt(r2)-sr)/dd;//bounding volume is a sphere
+      }
+      else {
+	p=abs(p); 
+        dist= (max(p.x,max(p.y,p.z))-sc)/dd;//bounding volume is a cube
+        //c.dist= (max(p.x,max(p.y,p.z))-sc)/dd;//bounding volume is a cube
+      }
+//  APPLY_ORBIT_TRAP;
+}
