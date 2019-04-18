@@ -22,8 +22,8 @@ float OffsetX= 1,
 float OffsetY= 1,
 float OffsetZ= 1,
 ADD_COLOR_PARAMS,
-//output _sdf c = _SDFDEF)
-  output float dist=0.)
+output _sdf c = _SDFDEF)
+//  output float dist=0.)
 {
      vec3 RotVector=vec3(RotVectorX,RotVectorY,RotVectorZ);
      vec3 Offset=vec3(OffsetX,OffsetY,OffsetZ);
@@ -59,13 +59,13 @@ ADD_COLOR_PARAMS,
 	}
       if (sphere==1)
       {
-	dist= (sqrt(r2)-sr)/dd;//bounding volume is a sphere
-//	c.dist= (sqrt(r2)-sr)/dd;//bounding volume is a sphere
+//	dist= (sqrt(r2)-sr)/dd;//bounding volume is a sphere
+	c.dist= (sqrt(r2)-sr)/dd;//bounding volume is a sphere
       }
       else {
 	p=abs(p); 
-        dist= (max(p.x,max(p.y,p.z))-sc)/dd;//bounding volume is a cube
-        //c.dist= (max(p.x,max(p.y,p.z))-sc)/dd;//bounding volume is a cube
+ //       dist= (max(p.x,max(p.y,p.z))-sc)/dd;//bounding volume is a cube
+       c.dist= (max(p.x,max(p.y,p.z))-sc)/dd;//bounding volume is a cube
       }
-//  APPLY_ORBIT_TRAP;
+  APPLY_ORBIT_TRAP;
 }
