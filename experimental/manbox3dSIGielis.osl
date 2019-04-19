@@ -1,0 +1,234 @@
+// Mandelbox3d ShapeInversion experiments with Gielis supershapes
+//    created by Gregg Helt
+// Allows replacing of spherical inversion with shape inversion where shape types are:
+//    0 => sphere
+//    1 => cube
+//    2 => Gielis 3D supershape
+//
+// Also allows replacing of min radius with same shapes
+//
+// Uses techniques described in paper:
+//      "Extending Mandelbox Fractals with Shape Inversions", Gregg Helt, July 2018, Bridges 2018 Conference Proceedings
+//      http://archive.bridgesmathart.org/2018/bridges2018-547.html
+//
+// Includes preset to recreate figure 4c from paper
+//
+// For more info on supershapes, see paper:
+//     "Superquadrics with rational and irrational symmetry", Gielis et al 2003:
+//     https://dl.acm.org/citation.cfm?id=781647
+// or Paul Bourke's overview: http://paulbourke.net/geometry/supershape/
+
+#include "octane-oslintrin.h"
+#include "ff-vectron.h"
+
+
+#define pi 3.14159265359
+
+mat3 rotationMatrixXYZ(vec3 v) {
+	return rotationMatrix3(vec3(1.0,0.0,0.0), v.x)*
+	rotationMatrix3(vec3(0.0,1.0,0.0), v.y)*
+	rotationMatrix3(vec3(0.0,0.0,1.0), v.z);
+}
+
+struct Shape {
+  int type;
+  float scale;
+  vec3 center;
+  mat3 rotMat;   // rotation matrix for shape rotation
+};
+
+vec3 getShapeIntersect(output vec3 p, Shape s,float ThetaPiOffset,float PhiPiOffset,int n1,int n2,int n3,int n4,int n5,int n6, int m1,int m2)  {
+  p *= s.rotMat; 
+  float pdistance = length(p);
+  vec3 intersectP = vec3(0.0,0.0,0.0);
+  // GLSL acos return value is in range [0, +PI]
+  //     (and value is undefined if |arg| > 1)
+  float theta = acos(p.z/pdistance);
+  // GLSL atan return value is in range [-PI, +PI]
+  //     (and value is undefined if arg2 == 0)
+  float phi;
+  if (p.x == 0.0) {
+    phi = atan2(p.y,0.00001);
+  }
+  else {
+    phi = atan2(p.y,p.x);
+  }
+
+  theta -= pi/2.0;
+  theta += ThetaPiOffset;
+  phi += PhiPiOffset;
+
+  if (s.type == 0) { // circle
+    intersectP = s.scale * vec3(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta));
+  }
+  else if (s.type == 1) { // origin-centered cube  (1 for current, 6 is legacy number for cube mode
+    if (p.x == 0.0 && p.y == 0.0 && p.z == 0.0)
+ { intersectP = p; }
+    else {
+      float maxdim = max(abs(p.x), max(abs(p.y), abs(p.z)));
+      intersectP = (p / maxdim) * s.scale;
+    }
+  }
+  else if (s.type == 2) {
+    // supershape formula expects phi range: [-pi/2,pi/2] and theta range [-pi,pi],
+    // so switch phi and theta:
+    float tmp  = phi;
+    phi = theta;
+    theta = tmp;
+
+    float r1 = pow( (pow(abs(cos(m1*theta/4.0)),n2) + pow(abs(sin(m1*theta/4.0)),n3)), -1.0/n1);
+    float r2 = pow(   (pow(abs(cos(m2*phi/4.0)),n5) +     pow(abs(sin(m2*phi/4.0)),n6)), -1.0/n4);
+    intersectP.x = s.scale * r1 * cos(theta) * r2 * cos(phi);
+    intersectP.y = s.scale * r1 * sin(theta) * r2 * cos(phi);
+    intersectP.z = s.scale * r2 * sin(phi);
+  }
+  else {  // out of range for ShapeTypes
+    intersectP =  vec3(1.0, 1.0, 1.0);
+  }
+  return intersectP;
+}
+
+// modified inversion that can use shapes other than circles
+void shapeInversion(inout vec3 p, inout float der,float MinScalingConstant,Shape invShape,Shape minShape,float ThetaPiOffset,float PhiPiOffset,int n1,int n2,int n3,int n4,int n5,int n6,int m1,int m2) {
+  vec3 minp = p;
+
+  // get point position _relative_ to shape center
+  p -= invShape.center;
+  minp -= minShape.center;
+
+  // get distance from point P to center of invShape, minShape, maxShape
+  float p2InvCenterSqr = dot(p,p);
+  float p2MinCenterSqr = dot(minp, minp);
+
+  // get point of intersection S with surface of shape (along a ray from shape center to point P)
+  vec3 invIntersect = getShapeIntersect(p, invShape,   ThetaPiOffset,PhiPiOffset,n1,n2,n3,n4,n5,n6,m1,m2);
+  vec3 minIntersect = getShapeIntersect(minp, minShape,ThetaPiOffset,PhiPiOffset,n1,n2,n3,n4,n5,n6,m1,m2);
+
+  // get distance from shape surface intersection point S to shape center
+  float s2InvCenterSqr = dot(invIntersect, invIntersect);
+  float s2MinCenterSqr = dot(minIntersect, minIntersect);
+
+  // determine if point P is inside invShape, minShape
+//  bool insideMinShape = (p2MinCenterSqr < s2MinCenterSqr);
+  //bool insideInvShape = (p2InvCenterSqr < s2InvCenterSqr);
+
+  if (p2MinCenterSqr<s2MinCenterSqr) {
+    float ratio = (invShape.scale * invShape.scale) / (minShape.scale * minShape.scale);
+    der *= ratio;
+    ratio *= MinScalingConstant;
+    p *= ratio;
+  }
+  else if (p2InvCenterSqr<s2InvCenterSqr) {
+    // if point is outside minShape but within invShape, do shape inversion relative to invShape
+    float ratio = s2InvCenterSqr/p2InvCenterSqr;
+    p *= ratio;
+    der *= ratio;
+  }
+  // get absolute point position (reverse offset relative to shape center)
+  p += invShape.center;
+}
+
+// standard Mandelbox box fold in 2D
+void boxFold(inout vec3 p, inout float der,int BoxFoldLimit )   {
+  // fold x
+  if (p.x > BoxFoldLimit) { p.x = 2.0*BoxFoldLimit - p.x; } 
+  else if (p.x < -BoxFoldLimit) { p.x = -2.0*BoxFoldLimit - p.x; }
+  // fold y
+  if (p.y > BoxFoldLimit) { p.y = 2.0*BoxFoldLimit - p.y; }
+  else if (p.y < -BoxFoldLimit) { p.y = -2.0*BoxFoldLimit -p.y; }
+  // fold z
+  if (p.z > BoxFoldLimit) { p.z = 2.0*BoxFoldLimit - p.z; }
+  else if (p.z < -BoxFoldLimit) { p.z = -2.0*BoxFoldLimit -p.z; }
+}
+
+shader manbox3DSIGie( 
+int Iterations = 17,
+float Bailout = 1000.0,
+int BoxFoldLimit = 1,
+int InvType = 2,
+float InvScale = 2.528,
+
+float InvCenterX= 0.,
+float InvCenterY= 0.,
+float InvCenterZ= 0.,
+
+float InvRotationX= 0.,
+float InvRotationY= 0.,
+float InvRotationZ= 0.,
+
+int MinType = 0,
+float MinScale = 1.502137,
+
+float MinCenterX= 0.,
+float MinCenterY= 0.,
+float MinCenterZ= 0.,
+
+float MinRotationX= 0.,
+float MinRotationY= 0.,
+float MinRotationZ= 0.,
+
+float ThetaPiOffset = 0,
+float PhiPiOffset = 0,
+float Scale = 1.913828,
+float MinScalingConstant = 1,
+float RotAngle = 0,
+
+
+float RotVectorX= 1.,
+float RotVectorY= 1.,
+float RotVectorZ= 1.,
+
+int n1 = 5,
+int n2 = 5,
+int n3 = 5,
+int m1 = 4,
+int n4 = 5,
+int n5 = 5,
+int n6 = 5,
+int m2 = 4,
+ADD_COLOR_PARAMS,
+output _sdf c = _SDFDEF)
+//  output float dist=0.)
+{
+
+
+vec3 InvCenter=vec3(InvCenterX,InvCenterY,InvCenterZ);
+vec3 InvRotation=vec3(InvRotationX,InvRotationY,InvRotationZ);
+vec3 MinCenter=vec3(MinCenterX,MinCenterY,MinCenterZ);
+vec3 MinRotation=vec3(MinRotationX,MinRotationY,MinRotationZ);
+vec3 RotVector=vec3(RotVectorX,RotVectorY,RotVectorZ);
+
+float absScalem1 = abs(Scale - 1.0);
+float AbsScaleRaisedTo1mIters = pow(abs(Scale), float(1-Iterations));
+
+  mat3 rot =  rotationMatrix3(normalize(RotVector), RotAngle);
+  Shape invShape = Shape(InvType,
+		   InvScale,
+		   InvCenter,
+		   rotationMatrixXYZ(InvRotation));
+  Shape minShape = Shape(MinType,
+		   MinScale, 
+		   MinCenter,
+		   rotationMatrixXYZ(MinRotation));
+
+  vec3 offset = vec3(P[0],P[1],P[2]);
+  vec3 p=offset;
+  float dr = 1.0;
+INIT_ORBIT_TRAP;
+  for (int i = 0; i < Iterations; i++) {
+    p *= rot;      // rotation (does not change derivative)
+    boxFold(p,dr,BoxFoldLimit);       // conditional reflection and scale
+    if (i < ColorIterations) {
+      float d2 = dot(p,p);
+      orbitTrap = min(orbitTrap, abs( d2));
+    }
+    shapeInversion(p,dr,MinScalingConstant,invShape,minShape,ThetaPiOffset,PhiPiOffset,n1,n2,n3,n4,n5,n6,m1,m2);    // conditional shape inversion
+    p = (p * Scale) + offset;  // scale and translate
+    dr = (dr * abs(Scale)) + 1.0;
+    float distance = dot(p,p);
+    if (distance > Bailout) { break; }
+  }
+  //dist= ((length(p) - absScalem1) / abs(dr)) - AbsScaleRaisedTo1mIters;
+  c.dist= ((length(p) - absScalem1) / abs(dr)) - AbsScaleRaisedTo1mIters;
+  APPLY_ORBIT_TRAP;
+}
