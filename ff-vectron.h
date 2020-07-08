@@ -17,6 +17,7 @@ vec3 __operator__add__(vec3 a, vec3 b) { return vec3(a.x+b.x, a.y+b.y, a.z+b.z);
 vec3 __operator__mul__(float val, vec3 v) { return vec3(val*v.x, val*v.y, val*v.z); }
 vec3 __operator__div__(vec3 a, float b) { return vec3(a.x/b, a.y/b, a.z/b); }
 vec3 __operator__mul__(float val, vec3 v) { return vec3(val*v.x, val*v.y, val*v.z); }
+vec3 __operator__mul__(vec3 a, vec3 b) { return vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
 vec3 __operator__add__(vec3 a, float b) { return vec3(a.x+b, a.y+b, a.z+b); }
 vec3 __operator__sub__(vec3 a, float b) { return vec3(a.x-b, a.y-b, a.z-b); }
 vec3 __operator__sub__(vec3 a, vec3 b) { return vec3(a.x-b.x, a.y-b.y, a.z-b.z); }
@@ -34,6 +35,7 @@ vec3 swap_xz(vec3 a) { return vec3(a.z, a.y, a.x ); }
 vec3 min(vec3 x, float v) { return vec3( min(x.x, v), min(x.y, v), min(x.z, v) ); }
 vec3 max(vec3 x, float v) { return vec3( max(x.x, v), max(x.y, v), max(x.z, v) ); }
 vec2 xy(vec3 v) { return vec2(v.x, v.y); }
+vec3 setXy(vec3 src, vec2 v) { return vec3(v.x, v.y, src.z ); }	
 // ------------------------------------------ vec4 ---------------------------------------------------
 struct vec4{ float x, y, z, w; };
 
@@ -44,6 +46,7 @@ vec4 __operator__mul__(vec4 a, float b) { return vec4(a.x*b, a.y*b, a.z*b, a.w*b
 vec4 __operator__mul__(vec4 a, vec4 b) { return vec4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w); }
 vec4 __operator__add__(vec4 a, vec4 b) { return vec4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
 vec4 __operator__sub__(vec4 a, vec4 b) { return vec4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
+vec3 __operator__mul__(vec3 a, vec4 b) { return vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
 
 vec3 xyz(vec4 v) { return vec3(v.x, v.y, v.z); }
 vec3 xyz(vec4 v) { return vec3(v.x, v.y, v.z); }

@@ -3,7 +3,8 @@
 
 shader PseudoKleinian(int FoldingNumber = 7, 
 float minX = -0.8323, float minY =  -0.694, float minZ = -0.5045, float minW = 0.8067, 
-float maxX = 0.8579, float maxY = 1.0883, float maxZ = 0.8937, float maxW = 0.9411, 
+float maxX = 0.8579, float maxY = 1.0883, float maxZ = 0.8937, float maxW = 0.9411,
+float offX = 0.0, float offY = 0.0, float offZ = 0.0,
 ADD_COLOR_PARAMS,
 output _sdf c = _SDFDEF) {
   vec4 param_min = vec4(minX, minY, minZ, minW);
@@ -12,7 +13,9 @@ output _sdf c = _SDFDEF) {
   float scale = 1.0;
   float orb = 1e4;
   vec3 p = toVec3(P);
+  p.x += offX; p.y += offY; p.z += offZ;
   vec3 q = toVec3(P);
+  q.x += offX; q.y += offY; q.z += offZ;
   INIT_ORBIT_TRAP;
 
   for (int i = 0; i < FoldingNumber; i++) {
