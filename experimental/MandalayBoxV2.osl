@@ -1,0 +1,426 @@
+#include "octane-oslintrin.h"
+// Based on a DarkBeam fold formula adapted by Knighty
+// Reference: 
+// http://www.fractalforums.com/amazing-box-amazing-surf-and-variations/'new'-fractal-type-mandalay/msg81348/#msg81348
+// 
+//   OSL implementation from Mandelbulber 2.22 formula MandalayBox_V2
+//   by Jesus Sosa with help of Carbuncle Grim (mclarekin) developer of mandelbulber
+    
+struct vec3{ float x, y, z; };
+
+
+vec3 __operator__add__(vec3 a, vec3 b) { return vec3(a.x+b.x, a.y+b.y, a.z+b.z); }
+vec3 __operator__mul__(float val, vec3 v) { return vec3(val*v.x, val*v.y, val*v.z); }
+vec3 __operator__div__(vec3 a, float b) { return vec3(a.x/b, a.y/b, a.z/b); }
+vec3 __operator__mul__(float val, vec3 v) { return vec3(val*v.x, val*v.y, val*v.z);  }
+vec3 __operator__mul__(vec3 a, vec3 b) 
+{ 
+  vector a1=vector(a.x,a.y,a.z);
+  vector b1=vector(b.x,b.y,b.z);
+  vector c1= a1*b1;
+  return vec3(c1[0],c1[1],c1[2]);
+//  return vec3(a.x * b.x, a.y * b.y, a.z * b.z); 
+}
+vec3 __operator__add__(vec3 a, float b) { return vec3(a.x+b, a.y+b, a.z+b); }
+vec3 __operator__sub__(vec3 a, float b) { return vec3(a.x-b, a.y-b, a.z-b); }
+vec3 __operator__sub__(vec3 a, vec3 b) { return vec3(a.x-b.x, a.y-b.y, a.z-b.z); }
+vec3 __operator__mul__(vec3 a, float b) { return vec3(a.x*b, a.y*b, a.z*b); }
+
+float length(vec3 v) { return length(vector(v.x,v.y,v.z)); }
+
+vec3 fabs(vec3 a) { return vec3(fabs(a.x), fabs(a.y),fabs(a.z) ); }
+float dot(vec3 a, vec3 b) { return a.x*b.x + a.y*b.y + a.z*b.z; }
+
+vec3 swap_xy(vec3 a) { return vec3(a.y, a.x, a.z );}
+vec3 swap_xz(vec3 a) { return vec3(a.z, a.y, a.x ); }
+vec3 swap_yz(vec3 a) { return vec3(a.x, a.z, a.y ); }
+
+// ------------------------------------------ mat3 ---------------------------------------------------
+struct mat3{ float m00, m01, m02, m10, m11, m12, m20, m21, m22; };
+
+mat3 __operator__mul__(float val, mat3 m) { return mat3(val*m.m00, m.m01, m.m02, m.m10, val*m.m11, m.m12, m.m20, m.m21, val * m.m22); }
+
+mat3  rotationMatrix3(vec3 v, float angle)
+{ float c = cos(radians(angle)), s = sin(radians(angle)); 
+  return mat3(c+(1.0-c)*v.x*v.x, (1.0-c)*v.x*v.y-s*v.z, (1.0-c)*v.x*v.z+s*v.y, 
+             (1.0-c)*v.x*v.y+s*v.z, c+(1.0-c)*v.y*v.y, (1.0-c)*v.y*v.z-s*v.x,
+             (1.0-c)*v.x*v.z-s*v.y, (1.0-c)*v.y*v.z+s*v.x, c+(1.0-c)*v.z*v.z); 
+}
+
+mat3  rotationMatrix3(vector v, float angle)
+{ float c = cos(radians(angle)), s = sin(radians(angle)); 
+  return mat3(c+(1.0-c)*v[0]*v[0], (1.0-c)*v[0]*v[1]-s*v[2], (1.0-c)*v[0]*v[2]+s*v[1], 
+             (1.0-c)*v[0]*v[1]+s*v[2], c+(1.0-c)*v[1]*v[1], (1.0-c)*v[1]*v[2]-s*v[0],
+             (1.0-c)*v[0]*v[2]-s*v[1], (1.0-c)*v[1]*v[2]+s*v[0], c+(1.0-c)*v[2]*v[2]); 
+}
+
+mat3 __operator__mul__(mat3 A, mat3 B) 
+{
+  return mat3(A.m00*B.m00+A.m01*B.m10+A.m02*B.m20, A.m00*B.m01+A.m01*B.m11+A.m02*B.m21, A.m00*B.m02+A.m01*B.m12+A.m02*B.m22,
+              A.m10*B.m00+A.m11*B.m10+A.m12*B.m20, A.m10*B.m01+A.m11*B.m11+A.m12*B.m21, A.m10*B.m02+A.m11*B.m12+A.m12*B.m22, 
+              A.m20*B.m00+A.m21*B.m10+A.m22*B.m20, A.m20*B.m01+A.m21*B.m11+A.m22*B.m21, A.m20*B.m02+A.m21*B.m12+A.m22*B.m22); 
+}
+vec3 __operator__mul__(vec3 v, mat3 m) 
+{
+ return vec3(v.x*m.m00+v.y*m.m01+v.z*m.m02, v.x*m.m10+v.y*m.m11+v.z*m.m12, v.x*m.m20+v.y*m.m21+v.z*m.m22); 
+}
+
+vec3 __operator__mul__(vec3 v, mat3 m) 
+{
+ return vec3(v.x*m.m00+v.y*m.m01+v.z*m.m02, v.x*m.m10+v.y*m.m11+v.z*m.m12, v.x*m.m20+v.y*m.m21+v.z*m.m22); 
+}
+
+vector __operator__mul__(vector v, mat3 m) 
+{
+ return vector(v[0]*m.m00+v[1]*m.m01+v[2]*m.m02, v[0]*m.m10+v[1]*m.m11+v[2]*m.m12, v[0]*m.m20+v[1]*m.m21+v[2]*m.m22); 
+}
+
+mat3 rotationMatrixXYZ(vec3 v) {
+    return rotationMatrix3(vec3(1.0,0.0,0.0), v.x)*
+    rotationMatrix3(vec3(0.0,1.0,0.0), v.y)*
+    rotationMatrix3(vec3(0.0,0.0,1.0), v.z);
+}
+
+mat3 rotationMatrixXYZ(vector v) {
+    return rotationMatrix3(vector(1.0,0.0,0.0), v[0])*
+    rotationMatrix3(vector(0.0,1.0,0.0), v[1])*
+    rotationMatrix3(vector(0.0,0.0,1.0), v[2]);
+}
+
+mat3 euler_rotation(vector rot)
+{
+    vector v1=vector(-rot[0],-rot[1],-rot[2]);
+    vector v2=radians(v1);
+    vector rot_rad = v2;
+
+    float cosx = cos(rot_rad[0]);
+    float sinx = sin(rot_rad[0]);
+    mat3 x = mat3(1.,            0.,              0.,        
+                      0.,            cosx,           -sinx,   
+                      0.,            sinx,          cosx           
+                      );
+
+    float cosy = cos(rot_rad[1]);
+    float siny = sin(rot_rad[1]);
+    mat3 y = mat3(cosy,         0.,              siny,           
+                      0.,            1.,              0.,            
+                      -siny,        0.,              cosy
+                 );
+
+    float cosz = cos(rot_rad[2]);
+    float sinz = sin(rot_rad[2]);
+    mat3 z = mat3(cosz,         -sinz,          0.,              
+                      sinz,         cosz,           0.,        
+                      0.,            0.,              1.
+                );
+
+    mat3 xform ;
+    xform.m00=1.;
+    xform.m01=0.;
+    xform.m02=0.;
+    xform.m10=0.;
+    xform.m11=1.;
+    xform.m12=0.;
+    xform.m20=0.;
+    xform.m21=0.;
+    xform.m22=1.;
+    xform = xform*x;
+    xform = xform*y;
+    xform = xform*z;
+
+    return xform;
+}
+
+mat3 euler_rotation(vec3 rot)
+{
+    vector v1=vector(-rot.x,-rot.y,-rot.z);
+    vector v2=radians(v1);
+    vec3 rot_rad = vec3(v2[0],v2[1],v2[2]);
+
+    float cosx = cos(rot_rad.x);
+    float sinx = sin(rot_rad.x);
+    mat3 x = mat3(1.,            0.,              0.,        
+                      0.,            cosx,           -sinx,   
+                      0.,            sinx,          cosx           
+                      );
+
+    float cosy = cos(rot_rad.y);
+    float siny = sin(rot_rad.y);
+    mat3 y = mat3(cosy,         0.,              siny,           
+                      0.,            1.,              0.,            
+                      -siny,        0.,              cosy
+                 );
+
+    float cosz = cos(rot_rad.z);
+    float sinz = sin(rot_rad.z);
+    mat3 z = mat3(cosz,         -sinz,          0.,              
+                      sinz,         cosz,           0.,        
+                      0.,            0.,              1.
+                );
+
+    mat3 xform ;
+    xform.m00=1.;
+    xform.m01=0.;
+    xform.m02=0.;
+    xform.m10=0.;
+    xform.m11=1.;
+    xform.m12=0.;
+    xform.m20=0.;
+    xform.m21=0.;
+    xform.m22=1.;
+    xform = xform*x;
+    xform = xform*y;
+    xform = xform*z;
+
+    return xform;
+}
+
+	
+#define UV_MODE_LINEAR 0
+
+#define ADD_COLOR_PARAMS int ColorIterations = 16, \
+int UMode = UV_MODE_LINEAR, \
+float UScale = 1.
+//int VMode = UV_MODE_LINEAR, \
+//float VScale = 1
+
+#define INIT_ORBIT_TRAP float colorValue = 10000.0
+#define APPLY_ORBIT_TRAP   c.u = colorValue * UScale
+
+    shader OslGeometry(
+    
+// Fractal Parameters
+    int Iterations = 250,
+    float Bailout = 100.0,		
+
+    int tglad=0,
+	int tgStI=0,
+	int tgSpI=250,
+	int asurf=1,
+	float tgOffX=1,
+	float tgOffY=1,
+	float tgOffZ=1,
+	
+	int PreAbs=0,
+	int paStI=0,
+	int paSpI=250,
+	int abszX=1,
+	int abszY=1,
+	int abszZ=1,
+	
+    
+	int ParSer=0,
+    
+	float foldzX=0.5,
+    float foldzY=0.5,
+	float foldzZ=0.5,
+    
+    float OffzX=0.0,
+    float OffzY=0.0,
+    float OffzZ=0.0,
+   
+// spherical fold   
+	int sfStI=0,
+	int sfSpI=250,
+	float maxR=1.0,
+	float minR=0.25,
+	
+	float Scale=2.2,
+	int   vscale=0,
+	int   vsStI=0,
+	int   vsSpI=250,
+	float varySca=0.0,
+	float varyOff=1.0,
+	
+	int rotation=0,
+	int rotStI=0,
+	int rotSpI=250,
+	
+    float alpha=0.,
+    float beta=0.,
+    float gamma=0.,
+        
+    int aDE=1,
+    float DEScale=1.0,
+    float DEOffset=0.0,
+	
+	int auxcol=0,
+	float colminR2=0.2,
+	float colmaxR2=0.2,
+
+
+// Global Parameters
+    float juliax=0.,
+    float juliay=0.,
+    float juliaz=0.,
+    
+    float scaleX=1.,
+    float scaleY=1.,
+    float scaleZ=1.,
+    
+    ADD_COLOR_PARAMS,	
+
+    output _sdf c = _SDFDEF)
+{
+
+
+    vec3 z =vec3 (P[0],P[1],P[2]);
+    vec3 Julia=vec3(juliax,juliay,juliaz);
+    vec3 ScaleXYZ=vec3(scaleX,scaleY,scaleZ);
+    vector rotationangles=vector(alpha,beta,gamma);	
+    mat3 rot=euler_rotation(rotationangles);
+
+    vec3 foldzXYZ=vec3(foldzX,foldzY,foldzZ);
+    vec3 OffszXYZ=vec3(OffzX,OffzY,OffzZ);
+
+    vec3 p0=z*ScaleXYZ;
+	float rr=dot(z,z);
+	float Dd=1.0;
+	float actualScaleA=0.0;
+
+vec3 MandalayBoxV2(vec3 z, int i, output float rr, output float Dd)
+{
+  float colorAdd = 0.0;
+  float rrCol = 0.0;
+
+  // tglad fold
+  if ( (tglad==1) && i >= tgStI  && i < tgSpI)
+  {
+    z.x = fabs(z.x + tgOffX)
+          - fabs(z.x - tgOffX) - z.x;
+    z.y = fabs(z.y + tgOffY)
+          - fabs(z.y - tgOffY) - z.y;
+    if (asurf==0)
+    {
+      z.z = fabs(z.z + tgOffZ)
+            - fabs(z.z - tgOffZ) - z.z;
+    }
+  }
+
+  float signX = sign(z.x);
+  float signY = sign(z.y);
+  float signZ = sign(z.z);
+
+  if (PreAbs==1 && i >= paStI  && i < paSpI)
+  {
+    if (abszX==1) z.x = fabs(z.x);
+    if (abszY==1) z.y = fabs(z.y);
+    if (abszZ==1) z.z = fabs(z.z);
+  }
+  else
+  {
+    z = fabs(z);
+  }
+
+  vec3 fo = foldzXYZ;
+  vec3 g =  OffszXYZ;
+  vec3 p = z;
+  vec3 q = z;
+
+  float t1, t2, v, v1;
+
+  if(p.z > p.y) p=swap_yz(p);
+  t1 = p.x - 2.0 * fo.x;
+  t2 = p.y - 4.0 * fo.x;
+  v = max(fabs(t1 + fo.x) - fo.x, t2);
+  v1 = max(t1 - g.x, p.y);
+  v = min(v, v1);
+  q.x = min(v, p.x);
+
+  if (ParSer==1) p = z;
+  else p = q;
+
+  if(p.x > p.z) p=swap_xz(p);
+  t1 = p.y - 2.0 * fo.y;
+  t2 = p.z - 4.0 * fo.y;
+  v = max(fabs(t1 + fo.y) - fo.y, t2);
+  v1 = max(t1 - g.y, p.z);
+  v = min(v, v1);
+  q.y = min(v, p.y);
+
+  if (ParSer==1) p = z;
+  else p = q;
+
+  if(p.y > p.x) p=swap_xy(p);
+  t1 = p.z - 2.0 * fo.z;
+  t2 = p.x - 4.0 * fo.z;
+  v = max(fabs(t1 + fo.z) - fo.z, t2);
+  v1 = max(t1 - g.z, p.x);
+  v = min(v, v1);
+  q.z = min(v, p.z);
+
+  z = q;
+
+  z.x *= signX;
+  z.y *= signY;
+  z.z *= signZ;
+
+  // spherical fold
+  float useScale = 1.0;
+  
+  if (i >= sfStI && i < sfSpI)
+  {
+
+    float rr = dot(z,z);
+    rrCol = rr;
+    if (rr < minR)
+    {
+      float tglad_factor1 = maxR / minR;
+      z = z* tglad_factor1;
+      Dd = Dd * tglad_factor1;
+    }
+    else if (rr < maxR )
+    {
+      float tglad_factor2 = maxR / rr;
+      z = z* tglad_factor2;
+      Dd = Dd * tglad_factor2;
+    }
+  }
+
+  // scale
+  useScale = actualScaleA + Scale;
+  z = z* useScale;
+  Dd = Dd * fabs(useScale) + 1.0;
+
+  if ( (vscale==1)  && i >= vsStI  && i < vsSpI)
+  {
+    // update actualScaleA for next iteration
+    float vary = varySca * (fabs(actualScaleA) - varyOff);
+    actualScaleA = actualScaleA -vary;
+  }
+
+  // rotation
+  if (rotation==1 && i >= rotStI  && i < rotSpI)
+  {
+    z = z*rot;
+  }
+  return z;
+}
+
+	INIT_ORBIT_TRAP;
+    for (int i = 0; i < Iterations ; i++) 
+    {
+	   float colorAdd=0.0;
+	   float rrCol=0.0;
+	  if (aDE==1)
+      {  Dd =  Dd * DEScale + DEOffset;
+	     z=MandalayBoxV2(z, i, rr, Dd);
+	  }
+	  if (rr > Bailout) break;
+	  if (i < ColorIterations) colorValue = min(colorValue, rr);
+
+//	  if (auxcol==1)  //
+//      { if (rrCol < maxR)
+//        {
+//          colorAdd = colorAdd + colmaxR2 * (maxR- rrCol);
+//          if (rrCol < minR)
+//            colorAdd = colorAdd + colminR2 * (minR - rrCol) + colmaxR2* (maxR - minR);
+//        }
+//        colorValue =colorValue + colorAdd;
+//      }
+	  
+	}
+	vec3 p = fabs(z);
+    c.dist =  max(p.x, max(p.y, p.z)) / Dd;
+	APPLY_ORBIT_TRAP;
+}
