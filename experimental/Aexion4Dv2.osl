@@ -1,0 +1,145 @@
+// Aexion4Dv2, a formula from Mandelbulb 2.22
+//  Aexion's Quadray Sets from FractalForums
+//  Reference
+//   http://www.fractalforums.com/the-3d-mandelbulb/quadray-sets/msg31458/#msg31458
+//
+//   OSL implementation from Mandelbulber 2.22 formula Aexion4D v2
+//   by Jesus Sosa with help of Carbuncle Grim (mclarekin) developer of mandelbulber
+//
+
+#include "octane-oslintrin.h"
+
+struct vec4{ float x, y, z, w; };
+float length(vec4 a) { return sqrt(a.x*a.x + a.y*a.y + a.z*a.z + a.w*a.w); }
+vec4 fabs(vec4 a) { return vec4(fabs(a.x), fabs(a.y), fabs(a.z),fabs(a.w) ); }
+
+vec4 __operator__div__(vec4 a, float b) { return vec4(a.x/b, a.y/b, a.z/b, a.w/b); }
+vec4 __operator__mul__(vec4 a, float b) { return vec4(a.x*b, a.y*b, a.z*b, a.w*b); }
+vec4 __operator__mul__(vec4 a, vec4 b) { return vec4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w); }
+vec4 __operator__add__(vec4 a, vec4 b) { return vec4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
+vec4 __operator__sub__(vec4 a, vec4 b) { return vec4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
+
+#define UV_MODE_LINEAR 0
+
+#define ADD_COLOR_PARAMS int ColorIterations = 16, \
+int UMode = UV_MODE_LINEAR, \
+float UScale = 1.
+//int VMode = UV_MODE_LINEAR, \
+//float VScale = 1
+
+#define INIT_ORBIT_TRAP float colorValue = 10000.0
+#define APPLY_ORBIT_TRAP   c.u = colorValue * UScale
+
+
+    shader OslGeometry(
+    
+// Fractal Parameters
+    int Iterations = 250,
+    float Bailout = 100.0,		
+   
+	int initz=0,
+	int iabs=0,
+    
+	float cadd=-1.3,
+	
+	float offsetX=0.0,
+    float offsetY=0.0,
+	float offsetZ=0.0,
+	float offsetW=0.0,
+    
+	float scale=1.0,
+	
+    float scaleX=1.0,
+    float scaleY=1.0,
+    float scaleZ=1.0,
+	float scaleW=1.0,
+         
+    float DEScale=1.0,
+    float DEOffset=0.0,
+
+
+// Global Parameters
+    float juliax=0.,
+    float juliay=0.,
+    float juliaz=0.,
+	float juliaw=0.,
+    
+    float p0scaleX=1.,
+    float p0scaleY=1.,
+    float p0scaleZ=1.,
+	float p0scaleW=1.,
+    
+		   
+    float alpha=0.,
+    float beta=0.,
+    float gamma=0.,
+	
+    ADD_COLOR_PARAMS,	
+
+    output _sdf c = _SDFDEF)
+{
+
+	vec4 z =vec4 (P[0],P[1],P[2],1.);
+    float t = cadd;
+	vec4 const_c=vec4(0.,0.,0.,0.);
+	vec4 offset=vec4(offsetX,offsetY,offsetZ,offsetW);
+	vec4 vscale=vec4(scaleX,scaleY,scaleZ,scaleW);
+	
+	vec4 Julia=vec4(juliax,juliay,juliaz,juliaw);
+    vec4 p0;
+	
+vec4 aexion4Dv2(  output float r,output float dr)
+{
+ vec4 temp = z;
+  
+
+  dr = dr * 2.0 * r + 1.0;
+  t = 2.0 * z.w * z.z;
+  temp.x = z.x * z.x - z.y * z.y;
+  temp.y = t - temp.x;
+  temp.x += t;
+  t = 2.0 * z.x * z.y;
+  temp.z = z.z * z.z - z.w * z.w;
+  temp.w = t - temp.z;
+  temp.z += t;
+
+//  z = z* scale;
+//  dr = dr * DEScale + DEOffset;
+  z = temp + const_c;
+  return z;
+ }
+  
+
+    float r = length(z);
+	float dr = 1.0;
+	
+    vec4 vcadd = vec4(t, t, t, t);
+    vec4 temp = vec4(z.x + z.y + z.z, -z.x - z.y + z.z, -z.x + z.y - z.z, z.x - z.y - z.z);
+    temp = fabs(temp) + vcadd + offset;
+    if (iabs==1)
+	  temp = fabs(temp);
+      const_c = temp * vscale;
+    t = length(temp);
+    if (initz==1)
+   	  z = vec4(0.0, 0.0, 0.0, 0.0);
+    else
+    {
+      z = temp;
+      dr =  dr * t / r * DEScale;
+    }
+    r = t;
+	INIT_ORBIT_TRAP;
+	for (int i=0;i<Iterations;i++)
+	{
+	   z=aexion4Dv2(r,dr);
+	   //z = z* scale;
+	   dr = dr * DEScale + DEOffset;
+       z = z*scale  + Julia;	
+	   r = length(z);
+	   if (r > Bailout) break;
+	   if (i < ColorIterations) colorValue = min(colorValue, r);
+	   
+	}
+	c.dist = 0.5 * log(r) * r / dr;
+	APPLY_ORBIT_TRAP;
+}
